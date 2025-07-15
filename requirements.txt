@@ -1,0 +1,42 @@
+# MCP Windows Automation Server Requirements
+
+# Core MCP dependencies
+mcp>=1.0.0
+
+# Windows automation
+pyautogui>=0.9.54
+pywin32>=306
+psutil>=5.9.0
+pillow>=10.0.0
+
+# Web automation
+selenium>=4.15.0
+webdriver-manager>=4.0.0
+
+# Image processing and computer vision
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# GUI frameworks
+tkinter-tooltip>=2.0.0
+customtkinter>=5.2.0
+
+# HTTP and networking
+requests>=2.31.0
+aiohttp>=3.8.0
+
+# JSON and data handling
+jsonschema>=4.17.0
+
+# Logging and utilities
+colorlog>=6.7.0
+click>=8.1.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Development
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0

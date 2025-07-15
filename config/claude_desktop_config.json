@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "unified-server": {
+      "command": "python",
+      "args": ["D:\\mcpdocs\\mcpwindows\\unified_server.py"],
+      "cwd": "D:\\mcpdocs\\mcpwindows"
+    }
+  }
+}
