@@ -1,7 +1,20 @@
-# GitHub Repository Description
+# GitHub Repository About Section Setup
 
-## Short Description (for GitHub "About" section):
+## ✅ ADDED: Repository Description:
 🚀 AI-Powered Windows Automation Server using Model Context Protocol (MCP) | Control Windows apps, automate tasks, and manage systems through natural language commands with Claude, ChatGPT & other AI assistants | 80+ automation tools
+
+## 📝 How to Complete GitHub About Section:
+
+### 1. Go to Repository Settings:
+- Visit: https://github.com/mukul975/mcp-windows-automation
+- Click the ⚙️ gear icon next to "About" (top right of repository)
+
+### 2. Add Website (Optional):
+```
+https://github.com/mukul975/mcp-windows-automation
+```
+
+### 3. Add Topics (Copy and paste these one by one):
 
 ## Topics/Tags for GitHub:
 - mcp
