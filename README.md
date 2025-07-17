@@ -2,9 +2,8 @@
 
 [![Python](https://img.shields.io/badge/Python-3.7%2B-blue.svg)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Stars](https://img.shields.io/github/stars/mukul975/mcp-windows-automation?style=social)](https://github.com/mukul975/mcp-windows-automation)
-[![GitHub Forks](https://img.shields.io/github/forks/mukul975/mcp-windows-automation?style=social)](https://github.com/mukul975/mcp-windows-automation)
-[![GitHub Issues](https://img.shields.io/github/issues/mukul975/mcp-windows-automation)](https://github.com/mukul975/mcp-windows-automation/issues)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue)](https://modelcontextprotocol.io)
+[![Windows](https://img.shields.io/badge/Windows-10%2F11-blue.svg)](https://www.microsoft.com/windows)
 
 **Transform your Windows PC into an AI-controlled automation powerhouse!** 🤖
 
@@ -90,6 +89,15 @@ A comprehensive **Model Context Protocol (MCP)** server that enables AI assistan
 - **Configuration Management**: JSON-based configuration system
 - **Profile Management**: Multiple user profile support
 - **Customization**: Extensible plugin architecture
+
+### 🧠 **AI/ML Intelligence & Prediction**
+- **Behavior Learning**: Continuous monitoring and learning of user behavior patterns
+- **Action Prediction**: AI-powered prediction of user's next likely actions
+- **System Load Forecasting**: Predict future system resource usage and performance
+- **Automation Recommendations**: Smart suggestions based on usage patterns
+- **Performance Optimization**: ML-driven system optimization recommendations
+- **Background Monitoring**: Automatic data collection for model training
+- **Personalized Insights**: Tailored automation suggestions for individual users
 
 ## Installation
 

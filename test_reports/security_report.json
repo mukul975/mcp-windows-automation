@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-07-16T13:38:40.655847",
+  "test_results": {
+    "total_tests": 6,
+    "passed_tests": 0,
+    "failed_tests": 6,
+    "skipped_tests": 0,
+    "coverage": 0.0,
+    "performance_metrics": {
+      "initial": {
+        "cpu_usage": 48.8,
+        "memory_usage": 83.5,
+        "disk_usage": 99.5,
+        "process_count": 388
+      },
+      "final": {
+        "cpu_usage": 7.9,
+        "memory_usage": 82.5,
+        "disk_usage": 99.5,
+        "process_count": 386
+      }
+    },
+    "security_findings": [],
+    "start_time": 

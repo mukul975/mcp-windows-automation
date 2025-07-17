@@ -185,3 +185,15 @@ user_preferences.json
 # Log files
 *.log
 logs/
+
+# Application and system logs
+application_logs.json
+system_logs.json
+ml_data.json
+
+# ML models and training data
+*.pkl
+training_data.csv
+
+# Config files with sensitive data
+config/claude_desktop_config_alternative.json

@@ -1,9 +1,80 @@
 {
   "mcpServers": {
-    "unified-server": {
-      "command": "python",
-      "args": ["D:\\mcpdocs\\mcpwindows\\unified_server.py"],
-      "cwd": "D:\\mcpdocs\\mcpwindows"
+    "blender": {
+      "command": "uvx",
+      "args": [
+        "blender-mcp"
+      ]
+    },
+        "unified-server": {
+          "command": "python",
+          "args": ["D:\\mcpdocs\\mcpwindows\\unified_server.py"],
+          "cwd": "D:\\mcpdocs\\mcpwindows"
+        },
+        "unrealMCP": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "C:/Users/mukul/Downloads/unreal-mcp-main/unreal-mcp-main/Python",
+        "run",
+        "unreal_mcp_server.py"
+      ]
+    },
+      "database-mcp-server": {
+        "command": "python",
+        "args": [
+          "-m",
+          "dbmcp.server"
+        ],
+        "env": {
+          "POSTGRES_USER": "your_postgres_user",
+          "MONGODB_USER": "your_mongodb_user",
+          "MONGODB_DATABASE": "your_mongodb_database",
+          "MYSQL_USER": "your_mysql_user",
+          "SQLITE_DB_PATH": "D:/mcpdocs/dbmcp/sqlite_database.db",
+          "PYTHONPATH": "D:/mcpdocs/dbmcp/src",
+          "MYSQL_DATABASE": "your_mysql_database",
+          "DATABASE_MCP_DEBUG": "false",
+          "MONGODB_PASSWORD": "your_mongodb_password",
+          "MONGODB_HOST": "localhost",
+          "CRYPTO_KEY_STORE_PATH": "D:/mcpdocs/dbmcp/keys",
+          "MYSQL_HOST": "localhost",
+          "POSTGRES_DATABASE": "your_postgres_database",
+          "POSTGRES_PASSWORD": "your_postgres_password",
+          "DATABASE_MCP_LOG_LEVEL": "INFO",
+          "MONGODB_PORT": "27017",
+          "AUTH_JWT_SECRET_KEY": "your_secret_jwt_key",
+          "POSTGRES_HOST": "localhost",
+          "DATABASE_MCP_CONFIG_FILE": "config/dbmcp_config.yaml",
+          "MYSQL_PASSWORD": "Mukul@975",
+          "MYSQL_PORT": "3306",
+          "POSTGRES_PORT": "5432"
+        },
+        "working_directory": null,
+        "start_on_launch": true
+      },
+        "security-mcp-server": {
+          "command": "python",
+          "args": [
+            "-m",
+            "src.security_mcp_server.server"
+          ],
+          "cwd": "D:\\mcpdocs\\securemcp",
+          "env": {
+            "SECURITY_CONFIG_FILE": "config/security_mysql_simple.yaml",
+            "SECURITY_LOG_LEVEL": "INFO",
+            "SECURITY_DEBUG": "false",
+            "PYTHONPATH": "D:\\mcpdocs\\securemcp",
+            "MYSQL_HOST": "localhost",
+            "MYSQL_PORT": "3306",
+            "MYSQL_USER": "security_user",
+            "MYSQL_PASSWORD": "Mukul@975",
+            "MYSQL_DATABASE": "security_db",
+            "DATABASE_URL": "mysql+pymysql://security_user:Mukul@975@localhost:3306/security_db",
+            "AUTH_JWT_SECRET_KEY": "your-super-secret-jwt-key-change-this-in-production",
+            "CRYPTO_KEY_STORE_PATH": "C:\\security_keys"
+          }
+        }
+      }
     }
-  }
-}
+    
