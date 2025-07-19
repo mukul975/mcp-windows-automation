@@ -22,6 +22,7 @@ from ctypes import wintypes
 import winreg
 import urllib.parse
 import threading
+import logging
 from datetime import datetime
 
 # Advanced UI Automation imports
@@ -32,10 +33,14 @@ try:
     import websocket
     import socket
     from urllib.parse import urlparse
+    import keyboard
+    import pynput
+    from pynput import mouse, keyboard as pynput_keyboard
     UI_AUTOMATION_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     UI_AUTOMATION_AVAILABLE = False
-    print("Warning: UI automation libraries not available. Install: pip install pyautogui pygetwindow requests websocket-client")
+    print(f"Warning: UI automation libraries not available. Install: pip install pyautogui pygetwindow requests websocket-client keyboard pynput")
+    print(f"Import error: {e}")
 
 # Configure PyAutoGUI
 if UI_AUTOMATION_AVAILABLE:
@@ -404,8 +409,74 @@ async def last_photo() -> str:
 
 # Import ML components
 try:
+    import os
     from src.ml_predictive_engine import get_ml_engine
+    
+    # Ensure we're in the correct directory for data files
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
+    
     ML_ENGINE = get_ml_engine()
+    
+    # Force clear and reload data to ensure fresh state
+    data_collector = ML_ENGINE['data_collector']
+    data_collector.actions = []
+    data_collector.metrics = []
+    
+    # Load existing data from file
+    data_collector.load_data()
+    
+    actions_count = len(data_collector.actions)
+    metrics_count = len(data_collector.metrics)
+    
+    print(f"ML Engine initialized with {actions_count} actions and {metrics_count} metrics")
+    
+    # If no data loaded, check if file exists and has data
+    if actions_count == 0 and metrics_count == 0:
+        if os.path.exists('ml_data.json'):
+            file_size = os.path.getsize('ml_data.json')
+            print(f"ML data file exists (size: {file_size} bytes) but no data loaded - checking file integrity")
+            
+            # Try to load raw data to diagnose issue
+            try:
+                import json
+                with open('ml_data.json', 'r') as f:
+                    raw_data = json.load(f)
+                raw_actions = len(raw_data.get('actions', []))
+                raw_metrics = len(raw_data.get('metrics', []))
+                print(f"Raw file contains {raw_actions} actions and {raw_metrics} metrics")
+                
+                # If raw data exists but wasn't loaded, manually populate
+                if raw_actions > 0 or raw_metrics > 0:
+                    print("Manually loading data from file...")
+                    data_collector.actions = []
+                    data_collector.metrics = []
+                    
+                    # Manually reload with error handling
+                    from datetime import datetime
+                    from src.ml_predictive_engine import UserAction, SystemMetrics
+                    
+                    for action_data in raw_data.get('actions', []):
+                        try:
+                            action_data['timestamp'] = datetime.fromisoformat(action_data['timestamp'])
+                            data_collector.actions.append(UserAction(**action_data))
+                        except Exception as e:
+                            print(f"Error loading action: {e}")
+                    
+                    for metric_data in raw_data.get('metrics', []):
+                        try:
+                            metric_data['timestamp'] = datetime.fromisoformat(metric_data['timestamp'])
+                            data_collector.metrics.append(SystemMetrics(**metric_data))
+                        except Exception as e:
+                            print(f"Error loading metric: {e}")
+                    
+                    print(f"Successfully loaded {len(data_collector.actions)} actions and {len(data_collector.metrics)} metrics")
+                    
+            except Exception as e:
+                print(f"Error reading ML data file: {e}")
+        else:
+            print("No ML data file found - starting with empty dataset")
+    
     ML_AVAILABLE = True
 except ImportError as e:
     ML_AVAILABLE = False
@@ -527,7 +598,7 @@ async def get_automation_recommendations() -> str:
         if not recommendations:
             return "No recommendations available"
         
-        result = "🤖 Smart Automation Recommendations:\n\n"
+        result = "Smart Automation Recommendations:\n\n"
         
         for i, rec in enumerate(recommendations, 1):
             result += f"{i}. {rec['recommendation']}\n"
@@ -548,18 +619,33 @@ async def get_ml_stats() -> str:
         return "ML engine not available"
     
     try:
+        # Use the existing ML_ENGINE instance but refresh its data
         data_collector = ML_ENGINE['data_collector']
         behavior_predictor = ML_ENGINE['behavior_predictor']
         system_optimizer = ML_ENGINE['system_optimizer']
         
-        stats = f"📊 ML Engine Statistics:\n\n"
+        # Force reload data from file to get current stats (don't clear first)
+        original_actions = data_collector.actions[:]
+        original_metrics = data_collector.metrics[:]
+        
+        # Clear and reload
+        data_collector.actions = []
+        data_collector.metrics = []
+        data_collector.load_data()
+        
+        # If load failed (empty data), restore original data
+        if len(data_collector.actions) == 0 and len(data_collector.metrics) == 0 and (len(original_actions) > 0 or len(original_metrics) > 0):
+            data_collector.actions = original_actions
+            data_collector.metrics = original_metrics
+        
+        stats = f"ML Engine Statistics:\n\n"
         stats += f"Data Collection:\n"
         stats += f"  - User actions recorded: {len(data_collector.actions)}\n"
         stats += f"  - System metrics recorded: {len(data_collector.metrics)}\n\n"
         
         stats += f"Model Status:\n"
-        stats += f"  - Behavior predictor trained: {'✅' if behavior_predictor.is_trained else '❌'}\n"
-        stats += f"  - System optimizer trained: {'✅' if system_optimizer.is_trained else '❌'}\n\n"
+        stats += f"  - Behavior predictor trained: {'YES' if behavior_predictor.is_trained else 'NO'}\n"
+        stats += f"  - System optimizer trained: {'YES' if system_optimizer.is_trained else 'NO'}\n\n"
         
         if len(data_collector.actions) > 0:
             recent_actions = data_collector.actions[-5:]
@@ -602,7 +688,7 @@ async def auto_optimize_system() -> str:
         # Get behavior recommendations
         recommendations = ML_ENGINE['recommendation_engine'].get_recommendations()
         
-        result = "🚀 System Auto-Optimization Results:\n\n"
+        result = "System Auto-Optimization Results:\n\n"
         result += f"Current CPU: {current_load:.1f}%\n"
         result += f"Predicted CPU: {predicted_load:.1f}%\n\n"
         
@@ -639,39 +725,188 @@ async def get_last_metric() -> str:
 
 @mcp.tool()
 async def start_ml_monitoring() -> str:
-    """Start continuous ML monitoring and data collection"""
+    """Start comprehensive ML monitoring and data collection"""
     if not ML_AVAILABLE:
         return "ML engine not available"
     
     try:
+        # Import and start comprehensive monitoring
+        from comprehensive_user_monitor import start_comprehensive_monitoring, get_monitoring_stats
+        
         # Record initial metrics
         ML_ENGINE['data_collector'].record_system_metrics()
         
-        # In a real implementation, you would start a background thread
-        # that continuously monitors and records data
-        
-        return "🔍 ML monitoring started - system metrics and user actions will be recorded automatically"
+        # Start comprehensive user monitoring
+        if start_comprehensive_monitoring():
+            # Also start background ML monitoring
+            started = start_background_monitoring()
+            return "Comprehensive ML monitoring started - all user actions and system metrics will be recorded automatically"
+        else:
+            return "Comprehensive monitoring already running"
     except Exception as e:
-        return f"Error starting monitoring: {str(e)}"
+        return f"Error starting comprehensive monitoring: {str(e)}"
+
+@mcp.tool()
+async def stop_ml_monitoring() -> str:
+    """Stop continuous ML monitoring"""
+    if not ML_AVAILABLE:
+        return "ML engine not available"
+    
+    try:
+        stopped = stop_background_monitoring()
+        
+        if stopped:
+            return "🛑 ML monitoring stopped"
+        else:
+            return "⚠️ ML monitoring was not running"
+    except Exception as e:
+        return f"Error stopping monitoring: {str(e)}"
+
+# Global variables for monitoring
+ML_MONITORING_ACTIVE = False
+ML_MONITOR_THREAD = None
 
 # Auto-record system metrics on server startup
 if ML_AVAILABLE:
     import threading
     import time
+    import datetime
     
-    def background_monitoring():
+def background_monitoring():
         """Background thread for continuous monitoring"""
-        while True:
+        global ML_MONITORING_ACTIVE
+        
+        print("Background ML monitoring started")
+        consecutive_errors = 0
+        
+        previous_active_window = None
+        previous_process_list = set(psutil.pids())
+
+        while ML_MONITORING_ACTIVE:
             try:
+                # Record system metrics
                 ML_ENGINE['data_collector'].record_system_metrics()
-                time.sleep(300)  # Record every 5 minutes
+
+                # Active window detection
+                try:
+                    active_window = gw.getActiveWindow()
+                    if active_window and active_window.title and active_window.title != previous_active_window:
+                        previous_active_window = active_window.title
+                        ML_ENGINE['data_collector'].record_action('window_focus', active_window.title, 0.0)
+                except Exception as e:
+                    # Fallback: use Windows API to get active window
+                    try:
+                        import ctypes
+                        from ctypes import wintypes
+                        user32 = ctypes.windll.user32
+                        kernel32 = ctypes.windll.kernel32
+                        
+                        # Get active window handle
+                        hwnd = user32.GetForegroundWindow()
+                        if hwnd:
+                            # Get window title
+                            length = user32.GetWindowTextLengthW(hwnd)
+                            if length > 0:
+                                buffer = ctypes.create_unicode_buffer(length + 1)
+                                user32.GetWindowTextW(hwnd, buffer, length + 1)
+                                window_title = buffer.value
+                                
+                                # Get process ID
+                                pid = wintypes.DWORD()
+                                user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+                                
+                                # Get process name
+                                try:
+                                    process = psutil.Process(pid.value)
+                                    process_name = process.name()
+                                    
+                                    if window_title != previous_active_window:
+                                        previous_active_window = window_title
+                                        ML_ENGINE['data_collector'].record_action('window_focus', f"{process_name}: {window_title}", 0.0)
+                                except:
+                                    if window_title != previous_active_window:
+                                        previous_active_window = window_title
+                                        ML_ENGINE['data_collector'].record_action('window_focus', window_title, 0.0)
+                    except Exception as e2:
+                        pass
+
+                # Process monitoring
+                current_process_list = set(psutil.pids())
+                new_processes = current_process_list - previous_process_list
+                for pid in new_processes:
+                    try:
+                        proc = psutil.Process(pid)
+                        proc_info = f"{proc.name()}({proc.exe()})"
+                        ML_ENGINE['data_collector'].record_action('launch', proc_info, 0.0)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                        pass
+                previous_process_list = current_process_list
+
+                # Record user actions
+                if pyautogui.onScreen(pyautogui.position()):
+                    ML_ENGINE['data_collector'].record_action('mouse', 'user', 0.0)
+                # Check for any key press activity (simplified approach)
+                try:
+                    # Check for common keys being pressed
+                    common_keys = ['space', 'enter', 'ctrl', 'alt', 'shift']
+                    key_pressed = any(keyboard.is_pressed(key) for key in common_keys)
+                    if key_pressed:
+                        ML_ENGINE['data_collector'].record_action('keyboard', 'user', 0.0)
+                except:
+                    pass  # Skip keyboard monitoring if there are issues
+                
+                # Get current counts
+                metrics_count = len(ML_ENGINE['data_collector'].metrics)
+                actions_count = len(ML_ENGINE['data_collector'].actions)
+                
+                # Print status every 10 collections
+                if metrics_count % 10 == 0:
+                    print(f"✅ ML Data: {metrics_count} metrics, {actions_count} actions")
+                
+                # Reset error counter on success
+                consecutive_errors = 0
+                
+                # Sleep for 5 seconds for rapid data collection
+                time.sleep(5)
+                
             except Exception as e:
-                logging.error(f"Background monitoring error: {e}")
-                time.sleep(60)  # Wait 1 minute before retrying
+                consecutive_errors += 1
+                print(f"❌ Background monitoring error ({consecutive_errors}): {e}")
+                
+                # If too many consecutive errors, sleep longer
+                if consecutive_errors > 5:
+                    print(f"⚠️ Too many errors ({consecutive_errors}), sleeping 5 minutes")
+                    time.sleep(300)  # Sleep 5 minutes
+                else:
+                    time.sleep(30)  # Wait 30 seconds before retrying
+        
+        print("🛑 Background ML monitoring stopped")
+
+def start_background_monitoring():
+    """Start background monitoring if not already running"""
+    global ML_MONITORING_ACTIVE, ML_MONITOR_THREAD
     
-    # Start background monitoring
-    monitor_thread = threading.Thread(target=background_monitoring, daemon=True)
-    monitor_thread.start()
+    if not ML_MONITORING_ACTIVE:
+        ML_MONITORING_ACTIVE = True
+        ML_MONITOR_THREAD = threading.Thread(target=background_monitoring, daemon=True)
+        ML_MONITOR_THREAD.start()
+        print("Background ML monitoring thread started")
+        return True
+    else:
+        print("⚠️ Background monitoring already running")
+        return False
+
+def stop_background_monitoring():
+    """Stop background monitoring"""
+    global ML_MONITORING_ACTIVE
+    
+    if ML_MONITORING_ACTIVE:
+        ML_MONITORING_ACTIVE = False
+        print("🛑 Background ML monitoring stopping...")
+        return True
+    else:
+        print("⚠️ Background monitoring not running")
+        return False
 
 @mcp.tool()
 async def get_window_list() -> str:
