@@ -407,9 +407,10 @@ try:
     from src.ml_predictive_engine import get_ml_engine
     ML_ENGINE = get_ml_engine()
     ML_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     ML_AVAILABLE = False
-    print("Warning: ML predictive engine not available. Run: pip install scikit-learn pandas numpy joblib")
+    print(f"Warning: ML predictive engine not available. Error: {e}")
+    print("Run: pip install scikit-learn pandas numpy joblib")
 
 @mcp.tool()
 async def record_user_action(action_type: str, application: str, duration: float = 1.0, success: bool = True) -> str:
@@ -615,6 +616,26 @@ async def auto_optimize_system() -> str:
         return result
     except Exception as e:
         return f"Error optimizing system: {str(e)}"
+
+@mcp.tool()
+async def get_last_metric() -> str:
+    """Get the most recent ML metric."""
+    if not ML_AVAILABLE:
+        return "ML engine not available"
+    try:
+        data_collector = ML_ENGINE['data_collector']
+        if len(data_collector.metrics) > 0:
+            last_metric = data_collector.metrics[-1]
+            return f"Last System Metric:\n" + \
+                   f"CPU Usage: {last_metric.cpu_usage:.1f}%\n" + \
+                   f"Memory Usage: {last_metric.memory_usage:.1f}%\n" + \
+                   f"Disk Usage: {last_metric.disk_usage:.1f}%\n" + \
+                   f"Active Processes: {last_metric.active_processes}\n" + \
+                   f"Timestamp: {last_metric.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+        else:
+            return "No metrics recorded yet. Use record_system_metrics() first."
+    except Exception as e:
+        return f"Error fetching last metric: {str(e)}"
 
 @mcp.tool()
 async def start_ml_monitoring() -> str:
