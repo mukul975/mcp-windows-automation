@@ -6,39 +6,7 @@
   <meta name="author" content="mukul975" />
   <meta name="description" content="MCP Windows Automation Server - AI-powered, assistant-controlled automation framework for Windows 10/11 using Model Context Protocol (MCP)." />
   <meta name="keywords" content="AI automation, Windows automation, MCP protocol, ChatGPT assistant, Claude integration, LocalAI tools, OS control, Python automation, system assistant" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.7;
-      margin: 0 auto;
-      max-width: 960px;
-      padding: 20px;
-      background: #f9f9f9;
-      color: #222;
-    }
-    h1, h2, h3 {
-      color: #1a73e8;
-    }
-    pre, code {
-      background: #eee;
-      padding: 0.5em;
-      border-radius: 5px;
-      overflow-x: auto;
-    }
-    .badge img {
-      margin-right: 8px;
-    }
-    a {
-      color: #007acc;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    hr {
-      margin: 40px 0;
-    }
-  </style>
+ 
 </head>
 <body>
 
