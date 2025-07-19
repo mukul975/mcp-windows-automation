@@ -1,0 +1,8 @@
+{
+    "trigger":  "system_shutdown",
+    "end_time":  "2025-07-19T15:43:57",
+    "duration_seconds":  2.0179066999999997,
+    "event":  "shutdown_retraining",
+    "timestamp":  "2025-07-19T15:43:55",
+    "status":  "completed"
+}
