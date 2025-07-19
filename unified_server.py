@@ -1718,6 +1718,443 @@ async def move_mouse(x: int, y: int, duration: float = 0.25) -> str:
         return f"Error moving mouse: {str(e)}"
 
 # ==============================================================================
+# COMPREHENSIVE WIFI MANAGEMENT TOOLS
+# ==============================================================================
+
+@mcp.tool()
+async def wifi_profiles_list() -> str:
+    """List saved WiFi profiles"""
+    try:
+        result = subprocess.run(
+            'netsh wlan show profiles',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        return f"WiFi Profiles:\n{result.stdout}"
+    except Exception as e:
+        return f"Error listing WiFi profiles: {str(e)}"
+
+@mcp.tool()
+async def wifi_scan_networks() -> str:
+    """Scan for available WiFi networks"""
+    try:
+        result = subprocess.run(
+            'netsh wlan show profiles',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        # Also get available networks
+        scan_result = subprocess.run(
+            'netsh wlan show all',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"Saved WiFi Profiles:\n{result.stdout}\n\nAvailable Networks:\n{scan_result.stdout[:2000]}..."
+    except Exception as e:
+        return f"Error scanning WiFi networks: {str(e)}"
+
+@mcp.tool()
+async def wifi_connect_profile(profile_name: str) -> str:
+    """Connect to a saved WiFi profile"""
+    try:
+        result = subprocess.run(
+            f'netsh wlan connect name="{profile_name}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            return f"Successfully connected to WiFi profile: {profile_name}\n{result.stdout}"
+        else:
+            return f"Failed to connect to WiFi profile: {profile_name}\nError: {result.stderr}"
+    except Exception as e:
+        return f"Error connecting to WiFi: {str(e)}"
+
+@mcp.tool()
+async def wifi_disconnect() -> str:
+    """Disconnect from current WiFi network"""
+    try:
+        result = subprocess.run(
+            'netsh wlan disconnect',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            return f"Successfully disconnected from WiFi\n{result.stdout}"
+        else:
+            return f"Failed to disconnect from WiFi\nError: {result.stderr}"
+    except Exception as e:
+        return f"Error disconnecting from WiFi: {str(e)}"
+
+@mcp.tool()
+async def wifi_delete_profile(profile_name: str) -> str:
+    """Delete a saved WiFi profile"""
+    try:
+        result = subprocess.run(
+            f'netsh wlan delete profile name="{profile_name}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            return f"Successfully deleted WiFi profile: {profile_name}\n{result.stdout}"
+        else:
+            return f"Failed to delete WiFi profile: {profile_name}\nError: {result.stderr}"
+    except Exception as e:
+        return f"Error deleting WiFi profile: {str(e)}"
+
+@mcp.tool()
+async def wifi_show_profile_details(profile_name: str) -> str:
+    """Show detailed information about a WiFi profile"""
+    try:
+        result = subprocess.run(
+            f'netsh wlan show profile name="{profile_name}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"WiFi Profile Details for '{profile_name}':\n{result.stdout}"
+    except Exception as e:
+        return f"Error showing WiFi profile details: {str(e)}"
+
+@mcp.tool()
+async def wifi_show_interfaces() -> str:
+    """Show WiFi adapter interfaces and their status"""
+    try:
+        result = subprocess.run(
+            'netsh wlan show interfaces',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"WiFi Interfaces:\n{result.stdout}"
+    except Exception as e:
+        return f"Error showing WiFi interfaces: {str(e)}"
+
+@mcp.tool()
+async def wifi_show_drivers() -> str:
+    """Show WiFi driver information"""
+    try:
+        result = subprocess.run(
+            'netsh wlan show drivers',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"WiFi Drivers:\n{result.stdout}"
+    except Exception as e:
+        return f"Error showing WiFi drivers: {str(e)}"
+
+@mcp.tool()
+async def wifi_export_profile(profile_name: str, export_path: str = ".") -> str:
+    """Export a WiFi profile to XML file"""
+    try:
+        result = subprocess.run(
+            f'netsh wlan export profile name="{profile_name}" folder="{export_path}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            return f"Successfully exported WiFi profile '{profile_name}' to {export_path}\n{result.stdout}"
+        else:
+            return f"Failed to export WiFi profile '{profile_name}'\nError: {result.stderr}"
+    except Exception as e:
+        return f"Error exporting WiFi profile: {str(e)}"
+
+@mcp.tool()
+async def wifi_import_profile(xml_file_path: str) -> str:
+    """Import a WiFi profile from XML file"""
+    try:
+        if not os.path.exists(xml_file_path):
+            return f"XML file not found: {xml_file_path}"
+        
+        result = subprocess.run(
+            f'netsh wlan add profile filename="{xml_file_path}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            return f"Successfully imported WiFi profile from {xml_file_path}\n{result.stdout}"
+        else:
+            return f"Failed to import WiFi profile from {xml_file_path}\nError: {result.stderr}"
+    except Exception as e:
+        return f"Error importing WiFi profile: {str(e)}"
+
+@mcp.tool()
+async def wifi_create_hotspot(ssid: str, password: str) -> str:
+    """Create a WiFi hotspot (requires administrative privileges)"""
+    try:
+        # Set up hosted network
+        setup_result = subprocess.run(
+            f'netsh wlan set hostednetwork mode=allow ssid="{ssid}" key="{password}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if setup_result.returncode != 0:
+            return f"Failed to set up hotspot configuration\nError: {setup_result.stderr}"
+        
+        # Start the hosted network
+        start_result = subprocess.run(
+            'netsh wlan start hostednetwork',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if start_result.returncode == 0:
+            return f"Successfully created and started WiFi hotspot '{ssid}'\nSetup: {setup_result.stdout}\nStart: {start_result.stdout}"
+        else:
+            return f"Hotspot configured but failed to start\nSetup: {setup_result.stdout}\nStart Error: {start_result.stderr}"
+    except Exception as e:
+        return f"Error creating WiFi hotspot: {str(e)}"
+
+@mcp.tool()
+async def wifi_stop_hotspot() -> str:
+    """Stop the WiFi hotspot"""
+    try:
+        result = subprocess.run(
+            'netsh wlan stop hostednetwork',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        if result.returncode == 0:
+            return f"Successfully stopped WiFi hotspot\n{result.stdout}"
+        else:
+            return f"Failed to stop WiFi hotspot\nError: {result.stderr}"
+    except Exception as e:
+        return f"Error stopping WiFi hotspot: {str(e)}"
+
+@mcp.tool()
+async def wifi_hotspot_status() -> str:
+    """Show WiFi hotspot status"""
+    try:
+        result = subprocess.run(
+            'netsh wlan show hostednetwork',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"WiFi Hotspot Status:\n{result.stdout}"
+    except Exception as e:
+        return f"Error showing WiFi hotspot status: {str(e)}"
+
+@mcp.tool()
+async def wifi_signal_strength() -> str:
+    """Show signal strength of current and nearby networks"""
+    try:
+        # Get current connection info
+        current_result = subprocess.run(
+            'netsh wlan show interfaces',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        # Get nearby networks with signal strength
+        nearby_result = subprocess.run(
+            'netsh wlan show profiles',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"Current Connection:\n{current_result.stdout}\n\nNearby Networks:\n{nearby_result.stdout}"
+    except Exception as e:
+        return f"Error showing WiFi signal strength: {str(e)}"
+
+@mcp.tool()
+async def wifi_network_report() -> str:
+    """Generate a comprehensive WiFi network report"""
+    try:
+        # Generate WLAN report
+        report_result = subprocess.run(
+            'netsh wlan show wlanreport',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        
+        return f"WiFi Network Report Generated:\n{report_result.stdout}"
+    except Exception as e:
+        return f"Error generating WiFi network report: {str(e)}"
+
+@mcp.tool()
+async def wifi_adapter_reset() -> str:
+    """Reset WiFi adapter (disable and re-enable)"""
+    try:
+        # Get WiFi adapter name first
+        adapter_result = subprocess.run(
+            'netsh interface show interface',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        # Try to reset wireless adapter
+        reset_result = subprocess.run(
+            'netsh interface set interface "Wi-Fi" admin=disable',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        time.sleep(3)  # Wait a moment
+        
+        enable_result = subprocess.run(
+            'netsh interface set interface "Wi-Fi" admin=enable',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"WiFi Adapter Reset:\nAdapters: {adapter_result.stdout[:500]}\nDisable: {reset_result.stdout}\nEnable: {enable_result.stdout}"
+    except Exception as e:
+        return f"Error resetting WiFi adapter: {str(e)}"
+
+@mcp.tool()
+async def wifi_troubleshoot() -> str:
+    """Run WiFi troubleshooting diagnostics"""
+    try:
+        # Run network diagnostics
+        diag_result = subprocess.run(
+            'msdt.exe /id NetworkDiagnosticsNetworkAdapter',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        
+        # Get network configuration
+        config_result = subprocess.run(
+            'ipconfig /all',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"WiFi Troubleshooting:\nDiagnostics: {diag_result.stdout}\n\nNetwork Config:\n{config_result.stdout[:1000]}..."
+    except Exception as e:
+        return f"Error running WiFi troubleshooting: {str(e)}"
+
+@mcp.tool()
+async def wifi_power_management() -> str:
+    """Show and manage WiFi adapter power settings"""
+    try:
+        # Get power management settings via PowerShell
+        power_result = subprocess.run(
+            'powershell.exe "Get-NetAdapterPowerManagement | Format-List"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"WiFi Power Management Settings:\n{power_result.stdout}"
+    except Exception as e:
+        return f"Error showing WiFi power management: {str(e)}"
+
+@mcp.tool()
+async def wifi_security_audit() -> str:
+    """Perform a WiFi security audit of saved profiles"""
+    try:
+        security_report = ["WiFi Security Audit Report:", "=" * 40]
+        
+        # Get all profiles
+        profiles_result = subprocess.run(
+            'netsh wlan show profiles',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        # Parse profile names
+        profiles = []
+        for line in profiles_result.stdout.split('\n'):
+            if 'All User Profile' in line:
+                profile_name = line.split(':')[1].strip()
+                profiles.append(profile_name)
+        
+        security_report.append(f"\nFound {len(profiles)} saved WiFi profiles")
+        security_report.append("\nProfile Security Analysis:")
+        
+        for profile in profiles[:10]:  # Limit to first 10 profiles
+            try:
+                # Get profile details
+                detail_result = subprocess.run(
+                    f'netsh wlan show profile name="{profile}"',
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                
+                # Analyze security settings
+                details = detail_result.stdout
+                security_report.append(f"\n[{profile}]")
+                
+                if 'WPA2' in details:
+                    security_report.append("  Security: WPA2 (Good)")
+                elif 'WPA' in details:
+                    security_report.append("  Security: WPA (Moderate)")
+                elif 'WEP' in details:
+                    security_report.append("  Security: WEP (Weak - Consider avoiding)")
+                elif 'Open' in details:
+                    security_report.append("  Security: Open (No encryption - Risk!)")
+                else:
+                    security_report.append("  Security: Unknown")
+                
+            except Exception:
+                security_report.append(f"\n[{profile}] - Error analyzing security")
+        
+        return "\n".join(security_report)
+    except Exception as e:
+        return f"Error performing WiFi security audit: {str(e)}"
+
+# ==============================================================================
 # CHROME DEVTOOLS PROTOCOL-BASED WEB AUTOMATION WITH COOKIE MANAGEMENT
 # ==============================================================================
 
@@ -5730,6 +6167,588 @@ async def get_ml_monitor_detailed_status() -> str:
         
     except Exception as e:
         return f"Error generating detailed ML monitor status: {str(e)}"
+
+# ==============================================================================
+# COMPREHENSIVE NETWORK MANAGEMENT TOOLS
+# ==============================================================================
+
+@mcp.tool()
+async def get_network_interfaces() -> str:
+    """Get detailed network interface information"""
+    try:
+        command = '''
+        Write-Host "=== NETWORK INTERFACES ==="
+        $adapters = Get-NetAdapter | Sort-Object Name
+        foreach ($adapter in $adapters) {
+            Write-Host "Interface: $($adapter.Name)"
+            Write-Host "  Status: $($adapter.Status)"
+            Write-Host "  Link Speed: $($adapter.LinkSpeed)"
+            Write-Host "  MAC Address: $($adapter.MacAddress)"
+            Write-Host "  Interface Description: $($adapter.InterfaceDescription)"
+            Write-Host "  Media Type: $($adapter.MediaType)"
+            Write-Host "  Interface Index: $($adapter.InterfaceIndex)"
+            
+            # Get IP configuration
+            try {
+                $ipConfig = Get-NetIPAddress -InterfaceIndex $adapter.InterfaceIndex -ErrorAction SilentlyContinue
+                if ($ipConfig) {
+                    foreach ($ip in $ipConfig) {
+                        if ($ip.AddressFamily -eq "IPv4") {
+                            Write-Host "  IPv4 Address: $($ip.IPAddress)/$($ip.PrefixLength)"
+                        } elseif ($ip.AddressFamily -eq "IPv6") {
+                            Write-Host "  IPv6 Address: $($ip.IPAddress)/$($ip.PrefixLength)"
+                        }
+                    }
+                }
+            } catch {
+                Write-Host "  IP Configuration: Error retrieving"
+            }
+            
+            Write-Host "  ---"
+        }
+        '''
+        
+        result = subprocess.run(
+            f'powershell.exe -Command "{command}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"Network Interfaces:\n{result.stdout}\n{result.stderr}"
+        
+    except Exception as e:
+        return f"Error getting network interfaces: {str(e)}"
+
+@mcp.tool()
+async def network_adapters_info() -> str:
+    """Get detailed network adapter information"""
+    try:
+        command = '''
+        Write-Host "=== DETAILED NETWORK ADAPTER INFO ==="
+        $adapters = Get-WmiObject -Class Win32_NetworkAdapter | Where-Object {$_.NetConnectionStatus -ne $null}
+        
+        foreach ($adapter in $adapters) {
+            Write-Host "Adapter: $($adapter.Name)"
+            Write-Host "  Product Name: $($adapter.ProductName)"
+            Write-Host "  Manufacturer: $($adapter.Manufacturer)"
+            Write-Host "  MAC Address: $($adapter.MACAddress)"
+            Write-Host "  Connection Status: $($adapter.NetConnectionStatus)"
+            Write-Host "  Speed: $($adapter.Speed)"
+            Write-Host "  Interface Index: $($adapter.InterfaceIndex)"
+            Write-Host "  Device ID: $($adapter.DeviceID)"
+            Write-Host "  Service Name: $($adapter.ServiceName)"
+            
+            # Get network configuration
+            $config = Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object {$_.Index -eq $adapter.Index}
+            if ($config -and $config.IPEnabled) {
+                Write-Host "  IP Enabled: $($config.IPEnabled)"
+                Write-Host "  DHCP Enabled: $($config.DHCPEnabled)"
+                if ($config.IPAddress) {
+                    Write-Host "  IP Addresses: $($config.IPAddress -join ', ')"
+                }
+                if ($config.IPSubnet) {
+                    Write-Host "  Subnet Masks: $($config.IPSubnet -join ', ')"
+                }
+                if ($config.DefaultIPGateway) {
+                    Write-Host "  Default Gateways: $($config.DefaultIPGateway -join ', ')"
+                }
+                if ($config.DNSServerSearchOrder) {
+                    Write-Host "  DNS Servers: $($config.DNSServerSearchOrder -join ', ')"
+                }
+                if ($config.DHCPServer) {
+                    Write-Host "  DHCP Server: $($config.DHCPServer)"
+                }
+            }
+            Write-Host "  ---"
+        }
+        '''
+        
+        result = subprocess.run(
+            f'powershell.exe -Command "{command}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"Network Adapter Details:\n{result.stdout}\n{result.stderr}"
+        
+    except Exception as e:
+        return f"Error getting network adapter info: {str(e)}"
+
+@mcp.tool()
+async def wifi_profiles_list() -> str:
+    """List saved WiFi profiles"""
+    try:
+        # Get WiFi profiles
+        result = subprocess.run(
+            "netsh wlan show profiles",
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=15
+        )
+        
+        profiles_output = result.stdout
+        
+        # Get detailed info for each profile
+        import re
+        profile_names = re.findall(r'All User Profile\s*:\s*(.+)', profiles_output)
+        
+        detailed_info = ["=== WIFI PROFILES ==="]
+        detailed_info.append(f"Total Profiles Found: {len(profile_names)}\n")
+        
+        for profile in profile_names:
+            profile = profile.strip()
+            try:
+                detail_result = subprocess.run(
+                    f'netsh wlan show profile name="{profile}" key=clear',
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                
+                if detail_result.returncode == 0:
+                    detail_output = detail_result.stdout
+                    
+                    # Extract key information
+                    ssid_match = re.search(r'SSID name\s*:\s*"(.+?)"', detail_output)
+                    auth_match = re.search(r'Authentication\s*:\s*(.+)', detail_output)
+                    cipher_match = re.search(r'Cipher\s*:\s*(.+)', detail_output)
+                    key_match = re.search(r'Key Content\s*:\s*(.+)', detail_output)
+                    
+                    detailed_info.append(f"Profile: {profile}")
+                    if ssid_match:
+                        detailed_info.append(f"  SSID: {ssid_match.group(1)}")
+                    if auth_match:
+                        detailed_info.append(f"  Authentication: {auth_match.group(1).strip()}")
+                    if cipher_match:
+                        detailed_info.append(f"  Cipher: {cipher_match.group(1).strip()}")
+                    if key_match:
+                        key_content = key_match.group(1).strip()
+                        if key_content and key_content != "Absent":
+                            detailed_info.append(f"  Password: {key_content}")
+                        else:
+                            detailed_info.append(f"  Password: [Hidden/None]")
+                    detailed_info.append("  ---")
+            except:
+                detailed_info.append(f"Profile: {profile} - Error getting details")
+                detailed_info.append("  ---")
+        
+        return "\n".join(detailed_info)
+        
+    except Exception as e:
+        return f"Error listing WiFi profiles: {str(e)}"
+
+@mcp.tool()
+async def dns_cache_info() -> str:
+    """Get DNS cache information"""
+    try:
+        result = subprocess.run(
+            "ipconfig /displaydns",
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=15
+        )
+        
+        if result.returncode == 0:
+            dns_output = result.stdout
+            lines = dns_output.split('\n')
+            
+            # Count entries and extract some examples
+            record_count = dns_output.count('Record Name')
+            
+            # Extract first 10 DNS entries for display
+            entries = []
+            current_entry = {}
+            entry_count = 0
+            
+            for line in lines:
+                line = line.strip()
+                if "Record Name" in line:
+                    if current_entry and entry_count < 10:
+                        entries.append(current_entry)
+                    current_entry = {'name': line.split(':')[-1].strip()}
+                    entry_count += 1
+                elif "Record Type" in line:
+                    current_entry['type'] = line.split(':')[-1].strip()
+                elif "Data" in line and "Time To Live" not in line:
+                    current_entry['data'] = line.split(':')[-1].strip()
+            
+            # Add the last entry
+            if current_entry and entry_count <= 10:
+                entries.append(current_entry)
+            
+            result_text = f"=== DNS CACHE INFORMATION ===\n"
+            result_text += f"Total DNS Records: {record_count}\n\n"
+            result_text += "Recent DNS Entries (First 10):\n"
+            
+            for entry in entries:
+                result_text += f"Name: {entry.get('name', 'N/A')}\n"
+                result_text += f"  Type: {entry.get('type', 'N/A')}\n"
+                result_text += f"  Data: {entry.get('data', 'N/A')}\n"
+                result_text += "  ---\n"
+            
+            return result_text
+        else:
+            return f"Error getting DNS cache: {result.stderr}"
+        
+    except Exception as e:
+        return f"Error getting DNS cache info: {str(e)}"
+
+@mcp.tool()
+async def flush_dns_cache() -> str:
+    """Flush Windows DNS cache"""
+    try:
+        result = subprocess.run(
+            "ipconfig /flushdns",
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            return f"DNS Cache Flushed Successfully:\n{result.stdout}"
+        else:
+            return f"Error flushing DNS cache:\n{result.stderr}"
+        
+    except Exception as e:
+        return f"Error flushing DNS cache: {str(e)}"
+
+@mcp.tool()
+async def firewall_status() -> str:
+    """Get Windows Firewall status"""
+    try:
+        command = '''
+        Write-Host "=== WINDOWS FIREWALL STATUS ==="
+        
+        # Get firewall profiles
+        $profiles = Get-NetFirewallProfile
+        foreach ($profile in $profiles) {
+            Write-Host "Profile: $($profile.Name)"
+            Write-Host "  Enabled: $($profile.Enabled)"
+            Write-Host "  Default Inbound Action: $($profile.DefaultInboundAction)"
+            Write-Host "  Default Outbound Action: $($profile.DefaultOutboundAction)"
+            Write-Host "  Allow Inbound Rules: $($profile.AllowInboundRules)"
+            Write-Host "  Allow Local Firewall Rules: $($profile.AllowLocalFirewallRules)"
+            Write-Host "  Allow Local IPsec Rules: $($profile.AllowLocalIPsecRules)"
+            Write-Host "  Allow User Apps: $($profile.AllowUserApps)"
+            Write-Host "  Allow User Ports: $($profile.AllowUserPorts)"
+            Write-Host "  Allow Unicast Response: $($profile.AllowUnicastResponseToMulticast)"
+            Write-Host "  Notify on Listen: $($profile.NotifyOnListen)"
+            Write-Host "  Enable Stealth Mode: $($profile.EnableStealthModeForIPsec)"
+            Write-Host "  Log Allowed: $($profile.LogAllowed)"
+            Write-Host "  Log Blocked: $($profile.LogBlocked)"
+            Write-Host "  Log Ignored: $($profile.LogIgnored)"
+            Write-Host "  Log File Name: $($profile.LogFileName)"
+            Write-Host "  Log Max Size: $($profile.LogMaxSizeKilobytes) KB"
+            Write-Host "  ---"
+        }
+        '''
+        
+        result = subprocess.run(
+            f'powershell.exe -Command "{command}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        
+        return f"Windows Firewall Status:\n{result.stdout}\n{result.stderr}"
+        
+    except Exception as e:
+        return f"Error getting firewall status: {str(e)}"
+
+@mcp.tool()
+async def firewall_rules_list(direction: str = "inbound") -> str:
+    """List firewall rules"""
+    try:
+        # Validate direction
+        if direction.lower() not in ["inbound", "outbound"]:
+            direction = "inbound"
+        
+        command = f"""
+        Write-Host '=== FIREWALL {direction.upper()} RULES ==='
+        
+        \$rules = Get-NetFirewallRule -Direction {direction.title()} | Where-Object {{\$_.Enabled -eq 'True'}} | Select-Object -First 20
+        
+        foreach (\$rule in \$rules) {{
+            Write-Host "Rule: \$(\$rule.DisplayName)"
+            Write-Host "  Name: \$(\$rule.Name)"
+            Write-Host "  Enabled: \$(\$rule.Enabled)"
+            Write-Host "  Direction: \$(\$rule.Direction)"
+            Write-Host "  Action: \$(\$rule.Action)"
+            Write-Host "  Profile: \$(\$rule.Profile)"
+            Write-Host "  Program: \$(\$rule.Program)"
+            
+            # Get port information
+            try {{
+                \$portFilter = \$rule | Get-NetFirewallPortFilter -ErrorAction SilentlyContinue
+                if (\$portFilter) {{
+                    Write-Host "  Protocol: \$(\$portFilter.Protocol)"
+                    Write-Host "  Local Port: \$(\$portFilter.LocalPort)"
+                    Write-Host "  Remote Port: \$(\$portFilter.RemotePort)"
+                }}
+            }} catch {{}}
+            
+            # Get address information
+            try {{
+                \$addressFilter = \$rule | Get-NetFirewallAddressFilter -ErrorAction SilentlyContinue
+                if (\$addressFilter) {{
+                    Write-Host "  Local Address: \$(\$addressFilter.LocalAddress)"
+                    Write-Host "  Remote Address: \$(\$addressFilter.RemoteAddress)"
+                }}
+            }} catch {{}}
+            
+            Write-Host '  ---'
+        }}
+        
+        \$totalRules = (Get-NetFirewallRule -Direction {direction.title()} | Where-Object {{\$_.Enabled -eq 'True'}}).Count
+        Write-Host "Total {direction} enabled rules: \$totalRules (showing first 20)"
+        """
+        
+        result = subprocess.run(
+            f'powershell.exe -Command "{command}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=45
+        )
+        
+        return f"Firewall {direction.title()} Rules:\n{result.stdout}\n{result.stderr}"
+        
+    except Exception as e:
+        return f"Error getting firewall rules: {str(e)}"
+
+@mcp.tool()
+async def advanced_network_diagnostics() -> str:
+    """Advanced network diagnostics and troubleshooting"""
+    try:
+        command = '''
+        Write-Host "=== ADVANCED NETWORK DIAGNOSTICS ==="
+        
+        # Network connectivity test
+        Write-Host "\n1. CONNECTIVITY TESTS:"
+        $targets = @('8.8.8.8', '1.1.1.1', 'google.com', 'microsoft.com')
+        foreach ($target in $targets) {
+            try {
+                $ping = Test-Connection -ComputerName $target -Count 1 -Quiet
+                $status = if ($ping) { "✓ PASS" } else { "✗ FAIL" }
+                Write-Host "  $target`: $status"
+            } catch {
+                Write-Host "  $target`: ✗ ERROR"
+            }
+        }
+        
+        # DNS resolution test
+        Write-Host "\n2. DNS RESOLUTION TESTS:"
+        $dnsTargets = @('google.com', 'github.com', 'stackoverflow.com')
+        foreach ($target in $dnsTargets) {
+            try {
+                $resolved = Resolve-DnsName -Name $target -Type A -ErrorAction SilentlyContinue
+                if ($resolved) {
+                    Write-Host "  $target`: ✓ RESOLVED ($($resolved[0].IPAddress))"
+                } else {
+                    Write-Host "  $target`: ✗ FAILED"
+                }
+            } catch {
+                Write-Host "  $target`: ✗ ERROR"
+            }
+        }
+        
+        # Network routes
+        Write-Host "\n3. NETWORK ROUTES (Top 10):"
+        $routes = Get-NetRoute | Sort-Object RouteMetric | Select-Object -First 10
+        foreach ($route in $routes) {
+            Write-Host "  Destination: $($route.DestinationPrefix) via $($route.NextHop) (Metric: $($route.RouteMetric))"
+        }
+        
+        # Active network connections
+        Write-Host "\n4. ACTIVE CONNECTIONS (Top 10):"
+        $connections = Get-NetTCPConnection | Where-Object {$_.State -eq "Established"} | Select-Object -First 10
+        foreach ($conn in $connections) {
+            Write-Host "  $($conn.LocalAddress):$($conn.LocalPort) -> $($conn.RemoteAddress):$($conn.RemotePort) ($($conn.State))"
+        }
+        
+        # Network statistics
+        Write-Host "\n5. NETWORK STATISTICS:"
+        $stats = Get-NetAdapterStatistics | Where-Object {$_.Name -notlike "*Loopback*"}
+        foreach ($stat in $stats) {
+            Write-Host "  Interface: $($stat.Name)"
+            Write-Host "    Bytes Sent: $([math]::Round($stat.BytesSent / 1MB, 2)) MB"
+            Write-Host "    Bytes Received: $([math]::Round($stat.BytesReceived / 1MB, 2)) MB"
+            Write-Host "    Packets Sent: $($stat.PacketsSent)"
+            Write-Host "    Packets Received: $($stat.PacketsReceived)"
+        }
+        
+        # Network adapter power management
+        Write-Host "\n6. ADAPTER POWER MANAGEMENT:"
+        $adapters = Get-NetAdapter | Where-Object {$_.Status -eq "Up"}
+        foreach ($adapter in $adapters) {
+            Write-Host "  $($adapter.Name): Link Speed $($adapter.LinkSpeed)"
+        }
+        '''
+        
+        result = subprocess.run(
+            f'powershell.exe -Command "{command}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        
+        return f"Advanced Network Diagnostics:\n{result.stdout}\n{result.stderr}"
+        
+    except Exception as e:
+        return f"Error running network diagnostics: {str(e)}"
+
+@mcp.tool()
+async def network_performance_monitor(duration: int = 60) -> str:
+    """Monitor network performance for specified duration"""
+    try:
+        if duration > 300:  # Limit to 5 minutes
+            duration = 300
+        
+        command = f'''
+        Write-Host "=== NETWORK PERFORMANCE MONITORING ==="
+        Write-Host "Duration: {duration} seconds"
+        Write-Host "Starting monitoring..."
+        
+        $startStats = Get-NetAdapterStatistics | Where-Object {{$_.Name -notlike "*Loopback*"}}
+        Start-Sleep -Seconds {duration}
+        $endStats = Get-NetAdapterStatistics | Where-Object {{$_.Name -notlike "*Loopback*"}}
+        
+        Write-Host "\nNETWORK USAGE DURING MONITORING PERIOD:"
+        
+        foreach ($startStat in $startStats) {{
+            $endStat = $endStats | Where-Object {{$_.Name -eq $startStat.Name}}
+            if ($endStat) {{
+                $bytesSentDiff = $endStat.BytesSent - $startStat.BytesSent
+                $bytesReceivedDiff = $endStat.BytesReceived - $startStat.BytesReceived
+                $packetsSentDiff = $endStat.PacketsSent - $startStat.PacketsSent
+                $packetsReceivedDiff = $endStat.PacketsReceived - $startStat.PacketsReceived
+                
+                $sendSpeedMbps = ($bytesSentDiff * 8) / ({duration} * 1000000)
+                $receiveSpeedMbps = ($bytesReceivedDiff * 8) / ({duration} * 1000000)
+                
+                Write-Host "\nInterface: $($startStat.Name)"
+                Write-Host "  Data Sent: $([math]::Round($bytesSentDiff / 1KB, 2)) KB"
+                Write-Host "  Data Received: $([math]::Round($bytesReceivedDiff / 1KB, 2)) KB"
+                Write-Host "  Packets Sent: $packetsSentDiff"
+                Write-Host "  Packets Received: $packetsReceivedDiff"
+                Write-Host "  Average Send Speed: $([math]::Round($sendSpeedMbps, 3)) Mbps"
+                Write-Host "  Average Receive Speed: $([math]::Round($receiveSpeedMbps, 3)) Mbps"
+            }}
+        }}
+        '''
+        
+        result = subprocess.run(
+            f'powershell.exe -Command "{command}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=duration + 30
+        )
+        
+        return f"Network Performance Monitor:\n{result.stdout}\n{result.stderr}"
+        
+    except Exception as e:
+        return f"Error monitoring network performance: {str(e)}"
+
+@mcp.tool()
+async def network_security_scan() -> str:
+    """Perform network security scanning and analysis"""
+    try:
+        command = '''
+        Write-Host "=== NETWORK SECURITY SCAN ==="
+        
+        # Check for open listening ports
+        Write-Host "\n1. LISTENING PORTS:"
+        $listeningPorts = Get-NetTCPConnection | Where-Object {$_.State -eq "Listen"} | Sort-Object LocalPort
+        
+        $portServices = @{
+            21 = "FTP"; 22 = "SSH"; 23 = "Telnet"; 25 = "SMTP"; 53 = "DNS"
+            80 = "HTTP"; 110 = "POP3"; 143 = "IMAP"; 443 = "HTTPS"; 993 = "IMAPS"
+            995 = "POP3S"; 3389 = "RDP"; 5432 = "PostgreSQL"; 3306 = "MySQL"
+            1433 = "SQL Server"; 5985 = "WinRM HTTP"; 5986 = "WinRM HTTPS"
+        }
+        
+        foreach ($port in $listeningPorts) {
+            $service = $portServices[$port.LocalPort]
+            if (-not $service) { $service = "Unknown" }
+            $process = Get-Process -Id $port.OwningProcess -ErrorAction SilentlyContinue
+            $processName = if ($process) { $process.ProcessName } else { "Unknown" }
+            
+            Write-Host "  Port $($port.LocalPort) ($service) - Process: $processName"
+        }
+        
+        # Check network shares
+        Write-Host "\n2. NETWORK SHARES:"
+        $shares = Get-SmbShare -ErrorAction SilentlyContinue
+        if ($shares) {
+            foreach ($share in $shares) {
+                Write-Host "  Share: $($share.Name) - Path: $($share.Path) - Type: $($share.ShareType)"
+            }
+        } else {
+            Write-Host "  No SMB shares found or access denied"
+        }
+        
+        # Check for suspicious network activity
+        Write-Host "\n3. SUSPICIOUS CONNECTIONS:"
+        $suspiciousConnections = Get-NetTCPConnection | Where-Object {
+            $_.RemoteAddress -ne "127.0.0.1" -and 
+            $_.RemoteAddress -ne "::1" -and
+            $_.State -eq "Established"
+        } | Group-Object RemoteAddress | Where-Object {$_.Count -gt 5} | Sort-Object Count -Descending
+        
+        if ($suspiciousConnections) {
+            foreach ($conn in $suspiciousConnections) {
+                Write-Host "  Multiple connections to $($conn.Name) (Count: $($conn.Count))"
+            }
+        } else {
+            Write-Host "  No suspicious connection patterns detected"
+        }
+        
+        # Check Windows Update service status
+        Write-Host "\n4. SECURITY SERVICES STATUS:"
+        $services = @("Windows Update", "Windows Security Service", "Windows Firewall")
+        foreach ($serviceName in $services) {
+            $service = Get-Service -Name "*$serviceName*" -ErrorAction SilentlyContinue
+            if ($service) {
+                Write-Host "  $($service.DisplayName): $($service.Status)"
+            }
+        }
+        
+        # Check for unusual network adapters
+        Write-Host "\n5. NETWORK ADAPTER SECURITY:"
+        $adapters = Get-NetAdapter | Where-Object {$_.Status -eq "Up"}
+        foreach ($adapter in $adapters) {
+            $suspicious = $false
+            if ($adapter.InterfaceDescription -like "*TAP*" -or $adapter.InterfaceDescription -like "*VPN*") {
+                $suspicious = $true
+            }
+            $status = if ($suspicious) { "⚠️ REVIEW" } else { "✓ OK" }
+            Write-Host "  $($adapter.Name) ($($adapter.InterfaceDescription)): $status"
+        }
+        '''
+        
+        result = subprocess.run(
+            f'powershell.exe -Command "{command}"',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=45
+        )
+        
+        return f"Network Security Scan:\n{result.stdout}\n{result.stderr}"
+        
+    except Exception as e:
+        return f"Error performing network security scan: {str(e)}"
 
 # ==============================================================================
 # MONITOR AND DISPLAY MANAGEMENT TOOLS
