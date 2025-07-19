@@ -1,0 +1,11 @@
+{
+  "scheduler_enabled": true,
+  "daily_training_time": "shutdown",
+  "weekly_training_day": "sunday",
+  "weekly_training_time": "02:00",
+  "min_daily_actions": 10,
+  "min_daily_metrics": 10,
+  "setup_timestamp": "2025-07-19T15:49:01.210495",
+  "trigger_mode": "shutdown",
+  "shutdown_retraining": true
+}

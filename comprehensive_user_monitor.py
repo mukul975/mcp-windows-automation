@@ -375,47 +375,172 @@ class ComprehensiveUserMonitor:
             self._record_activity(activity)
 
     def _monitor_browser_activity(self):
-        """Monitor browser URLs and web activity"""
-        print("Starting browser monitoring...")
+        """Monitor browser URLs and web activity with enhanced tab detection"""
+        print("Starting enhanced browser monitoring...")
+        
+        last_chrome_titles = set()  # Track Chrome window titles for tab detection
+        last_browser_check = time.time()
         
         while self.is_monitoring:
             try:
-                # Check browser processes
-                for proc in psutil.process_iter(['pid', 'name']):
-                    try:
-                        proc_name = proc.info.get('name')
-                        if proc_name and proc_name.lower() in self.browser_processes:
-                            # Record browser activity
-                            window_info = self._get_active_window_info()
-                            
-                            if (window_info and 
-                                window_info.get('process_name', '') and
-                                window_info.get('process_name', '').lower() in self.browser_processes and
-                                window_info.get('title')):
-                                
-                                # Extract URL from window title (simplified)
-                                title = window_info.get('title', '')
-                                if any(indicator in title.lower() for indicator in ['http', 'www', '.com', '.org', '.net']):
-                                    activity = UserActivity(
-                                        timestamp=datetime.now(),
-                                        activity_type='url_visit',
-                                        application=window_info.get('process_name', 'Browser'),
-                                        details=f"Browsing: {title}",
-                                        window_title=title,
-                                        process_id=window_info.get('pid', 0),
-                                        system_metrics=self._get_current_system_metrics()
-                                    )
-                                    
-                                    self._record_activity(activity)
-                    
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
-                        pass
+                current_time = time.time()
                 
-                time.sleep(5)  # Check every 5 seconds
+                # Enhanced Chrome tab detection (every 1 second for fast response)
+                self._detect_chrome_tabs(last_chrome_titles)
+                
+                # Standard browser monitoring (less frequent)
+                if current_time - last_browser_check >= 5:
+                    # Check browser processes
+                    for proc in psutil.process_iter(['pid', 'name']):
+                        try:
+                            proc_name = proc.info.get('name')
+                            if proc_name and proc_name.lower() in self.browser_processes:
+                                # Record browser activity
+                                window_info = self._get_active_window_info()
+                                
+                                if (window_info and 
+                                    window_info.get('process_name', '') and
+                                    window_info.get('process_name', '').lower() in self.browser_processes and
+                                    window_info.get('title')):
+                                    
+                                    # Extract URL from window title (simplified)
+                                    title = window_info.get('title', '')
+                                    if any(indicator in title.lower() for indicator in ['http', 'www', '.com', '.org', '.net']):
+                                        activity = UserActivity(
+                                            timestamp=datetime.now(),
+                                            activity_type='url_visit',
+                                            application=window_info.get('process_name', 'Browser'),
+                                            details=f"Browsing: {title}",
+                                            window_title=title,
+                                            process_id=window_info.get('pid', 0),
+                                            system_metrics=self._get_current_system_metrics()
+                                        )
+                                        
+                                        self._record_activity(activity)
+                        
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            pass
+                    
+                    last_browser_check = current_time
+                
+                time.sleep(1)  # Check every 1 second for faster tab detection
                 
             except Exception as e:
                 print(f"ERROR: Browser monitoring error: {e}")
-                time.sleep(10)
+                time.sleep(5)
+
+    def _detect_chrome_tabs(self, last_chrome_titles: set):
+        """Enhanced Chrome tab detection using multiple methods"""
+        try:
+            current_chrome_titles = set()
+            
+            # Method 1: Monitor all Chrome windows/tabs via window enumeration
+            if WINDOW_TRACKING_AVAILABLE:
+                try:
+                    # Get all Chrome windows
+                    chrome_windows = gw.getWindowsWithTitle('')  # Get all windows first
+                    for window in chrome_windows:
+                        if (window.title and 
+                            ('Chrome' in window.title or 
+                             any(indicator in window.title.lower() for indicator in 
+                                 ['http', 'www', '.com', '.org', '.net', 'localhost', 'youtube', 'spotify', 'github']))):
+                            current_chrome_titles.add(window.title)
+                            
+                            # Check for new tabs/windows
+                            if window.title not in last_chrome_titles:
+                                activity = UserActivity(
+                                    timestamp=datetime.now(),
+                                    activity_type='chrome_tab_open',
+                                    application='Chrome',
+                                    details=f"New Chrome tab/window: {window.title}",
+                                    window_title=window.title,
+                                    system_metrics=self._get_current_system_metrics()
+                                )
+                                self._record_activity(activity)
+                                
+                except Exception as e:
+                    pass  # Fallback to other methods
+            
+            # Method 2: Use Windows API to enumerate Chrome windows
+            try:
+                # Find Chrome processes
+                for proc in psutil.process_iter(['pid', 'name']):
+                    proc_name = proc.info.get('name', '').lower()
+                    if 'chrome' in proc_name:
+                        try:
+                            # Use Windows API to get window titles for this process
+                            windows = self._get_process_windows(proc.info['pid'])
+                            for window_title in windows:
+                                if (window_title and len(window_title.strip()) > 5 and 
+                                    not window_title.startswith('Chrome') and
+                                    any(indicator in window_title.lower() for indicator in 
+                                        ['http', 'www', '.com', '.org', '.net', 'localhost', 
+                                         'youtube', 'spotify', 'github', 'google', 'stackoverflow'])):
+                                    
+                                    current_chrome_titles.add(window_title)
+                                    
+                                    # Detect new tabs
+                                    if window_title not in last_chrome_titles:
+                                        activity = UserActivity(
+                                            timestamp=datetime.now(),
+                                            activity_type='chrome_tab_switch',
+                                            application='Chrome',
+                                            details=f"Chrome tab activity: {window_title}",
+                                            window_title=window_title,
+                                            process_id=proc.info['pid'],
+                                            system_metrics=self._get_current_system_metrics()
+                                        )
+                                        self._record_activity(activity)
+                        
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            continue
+            
+            except Exception as e:
+                pass  # Continue with what we have
+            
+            # Update the tracking set
+            last_chrome_titles.clear()
+            last_chrome_titles.update(current_chrome_titles)
+            
+        except Exception as e:
+            # Silently continue - this is an enhancement, not critical
+            pass
+    
+    def _get_process_windows(self, pid: int) -> List[str]:
+        """Get all window titles for a specific process ID using Windows API"""
+        window_titles = []
+        
+        def enum_windows_callback(hwnd, titles):
+            try:
+                # Check if this window belongs to our target process
+                window_pid = wintypes.DWORD()
+                user32.GetWindowThreadProcessId(hwnd, ctypes.byref(window_pid))
+                
+                if window_pid.value == pid:
+                    # Get window title
+                    length = user32.GetWindowTextLengthW(hwnd)
+                    if length > 0:
+                        buffer = ctypes.create_unicode_buffer(length + 1)
+                        user32.GetWindowTextW(hwnd, buffer, length + 1)
+                        title = buffer.value.strip()
+                        if title and len(title) > 3:  # Filter out very short titles
+                            titles.append(title)
+            except:
+                pass  # Skip problematic windows
+            
+            return True  # Continue enumeration
+        
+        try:
+            # Define the callback function type
+            WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.py_object)
+            callback = WNDENUMPROC(enum_windows_callback)
+            
+            # Enumerate all windows
+            user32.EnumWindows(callback, window_titles)
+        except:
+            pass  # Return empty list on error
+        
+        return window_titles
 
     def _monitor_file_activity(self):
         """Monitor file system activity"""
