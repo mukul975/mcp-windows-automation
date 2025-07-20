@@ -1,3 +1,18 @@
+# Database files that may contain sensitive information
+user_activity.db
+*.db
+*.sqlite
+*.sqlite3
+
+# API keys and secrets
+*.key
+*.secret
+.env
+.env.local
+.env.production
+config/secrets.json
+config/*_config.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
