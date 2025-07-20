@@ -34,19 +34,24 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+        cache-dependency-path: 'requirements.txt'
+      timeout-minutes: 10
 
     - name: 📦 Install dependencies
+      timeout-minutes: 15
       run: |
         python -m pip install --upgrade pip
         # Install dependencies, skipping Windows-specific packages on Linux
         if [[ "$RUNNER_OS" == "Linux" ]]; then
           # Create temp requirements file without Windows-specific packages for Linux
           grep -v "platform_system==\"Windows\"" requirements.txt > temp-requirements.txt
-          pip install -r temp-requirements.txt
+          echo "Installing filtered requirements for Linux:"
+          cat temp-requirements.txt
+          pip install -r temp-requirements.txt --timeout 300
         else
-          pip install -r requirements.txt
+          pip install -r requirements.txt --timeout 300
         fi
-        pip install safety bandit semgrep
+        pip install safety bandit semgrep --timeout 300
         
     - name: 🔍 Run Safety - Check for known vulnerabilities
       run: |
