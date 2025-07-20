@@ -85,7 +85,7 @@ jobs:
         echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
 
     - name: 📤 Upload Security Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: security-reports-py${{ matrix.python-version }}
