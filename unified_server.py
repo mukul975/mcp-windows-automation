@@ -19,7 +19,6 @@ import urllib.error
 import socket
 import re
 import threading
-import random
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any
