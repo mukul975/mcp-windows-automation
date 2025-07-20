@@ -7097,8 +7097,7 @@ async def monitor_status() -> str:
         '''
         
         result2 = subprocess.run(
-            f'powershell.exe -Command "{display_mode_command}"',
-            shell=True,
+            ["powershell.exe", "-Command", display_mode_command],
             capture_output=True,
             text=True,
             timeout=15
@@ -7181,8 +7180,7 @@ async def monitor_list_resolutions() -> str:
         '''
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -7242,8 +7240,7 @@ async def monitor_brightness_info() -> str:
         '''
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -7287,8 +7284,7 @@ async def monitor_set_brightness(brightness_level: int) -> str:
         '''
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=15
