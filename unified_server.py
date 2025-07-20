@@ -4769,13 +4769,22 @@ async def fetch_web_content(url: str, extract_text: bool = True) -> str:
             title_match = re.search(r'<title>(.*?)</title>', content, re.IGNORECASE | re.DOTALL)
             title = title_match.group(1).strip() if title_match else "No title found"
 
-            # Remove HTML tags and extract text
-            text_content = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
-            text_content = re.sub(r'<style[^>]*>.*?</style>', '', text_content, flags=re.DOTALL | re.IGNORECASE)
-            # Use a more restrictive regex pattern for HTML tags to avoid issues with malformed HTML
+            # Remove HTML tags and extract text using more secure patterns
+            # Fix CodeQL alert: Use proper regex patterns that handle malformed tags
+            
+            # Remove script blocks - handle various end tag formats including spaces
+            text_content = re.sub(r'<script(?:\s[^>]*)?>.*?</script\s*>', '', content, flags=re.DOTALL | re.IGNORECASE)
+            
+            # Remove style blocks - handle various end tag formats including spaces  
+            text_content = re.sub(r'<style(?:\s[^>]*)?>.*?</style\s*>', '', text_content, flags=re.DOTALL | re.IGNORECASE)
+            
+            # Remove comments
+            text_content = re.sub(r'<!--.*?-->', '', text_content, flags=re.DOTALL)
+            
+            # Use a more restrictive regex pattern for HTML tags to avoid security issues
             # Only match well-formed HTML tags with proper structure
-            text_content = re.sub(r'<[a-zA-Z][a-zA-Z0-9]*(?:\s[^<>]*)?/?>', '', text_content)  # Opening tags
-            text_content = re.sub(r'</[a-zA-Z][a-zA-Z0-9]*>', '', text_content)  # Closing tags
+            text_content = re.sub(r'<[a-zA-Z][a-zA-Z0-9]*(?:\s[^<>]*)?/?>', '', text_content)  # Opening/self-closing tags
+            text_content = re.sub(r'</[a-zA-Z][a-zA-Z0-9]*\s*>', '', text_content)  # Closing tags with optional spaces
 
             # Clean up whitespace
             text_content = re.sub(r'\s+', ' ', text_content).strip()
