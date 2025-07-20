@@ -4627,8 +4627,7 @@ async def network_speed_test() -> str:
         for name, ip in ping_targets:
             try:
                 result = subprocess.run(
-                    f"ping -n 4 {ip}",
-                    shell=True,
+                    ["ping", "-n", "4", ip],
                     capture_output=True,
                     text=True,
                     timeout=10
@@ -5315,8 +5314,7 @@ async def windows_feature_control(feature_name: str, action: str) -> str:
             return "Invalid action. Use 'enable' or 'disable'"
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=300  # Features can take time to enable/disable
@@ -5357,8 +5355,7 @@ async def event_log_query(log_name: str = "System", level: str = "Error", hours:
         command = f'Get-WinEvent -FilterHashtable @{{LogName="{log_name}"; Level={level_num}; StartTime="{start_time_str}"}} -MaxEvents 50 | Format-Table TimeCreated,Id,LevelDisplayName,Message -Wrap'
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -5378,8 +5375,7 @@ async def event_log_clear(log_name: str) -> str:
     try:
         command = f'Clear-EventLog -LogName "{log_name}"'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True
         )
@@ -5402,8 +5398,7 @@ async def task_scheduler_list() -> str:
     try:
         command = 'Get-ScheduledTask | Where-Object {$_.State -ne "Disabled"} | Format-Table TaskName,State,LastRunTime -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -5434,8 +5429,7 @@ async def task_scheduler_control(task_name: str, action: str) -> str:
         
         command = actions_map[action.lower()]
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -5459,8 +5453,7 @@ async def firewall_status() -> str:
     try:
         command = 'Get-NetFirewallProfile | Format-Table Name,Enabled,DefaultInboundAction,DefaultOutboundAction -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=15
@@ -5483,8 +5476,7 @@ async def firewall_rules_list(direction: str = "inbound") -> str:
         
         command = f'Get-NetFirewallRule -Direction {direction.capitalize()} -Enabled True | Format-Table DisplayName,Action,Direction,Protocol -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -5508,8 +5500,7 @@ async def user_accounts_list() -> str:
     try:
         command = 'Get-LocalUser | Format-Table Name,Enabled,LastLogon,PasswordExpires -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=15
@@ -5529,8 +5520,7 @@ async def user_groups_list() -> str:
     try:
         command = 'Get-LocalGroup | Format-Table Name,Description -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=15
@@ -5557,8 +5547,7 @@ async def certificates_list(store: str = "CurrentUser") -> str:
         
         command = f'Get-ChildItem Cert:\\{store}\\My | Format-Table Subject,Issuer,NotAfter,HasPrivateKey -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -5582,11 +5571,10 @@ async def performance_counters(counter_path: str = "\\Processor(_Total)\\% Proce
     try:
         command = f'Get-Counter -Counter "{counter_path}" -SampleInterval 1 -MaxSamples {samples} | Format-Table Timestamp,CounterSamples -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
-            timeout=samples + 10
+            timeout=120  # Performance counter operations can be slow
         )
         
         if result.returncode == 0:
@@ -5627,8 +5615,7 @@ async def drivers_list() -> str:
     try:
         command = 'Get-WindowsDriver -Online | Format-Table Driver,ClassName,ProviderName,Date,Version -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=60
