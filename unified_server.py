@@ -1054,8 +1054,9 @@ async def list_processes() -> str:
         for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
             try:
                 processes.append(f"PID: {proc.info['pid']:<8} CPU: {proc.info['cpu_percent']:<6}% MEM: {proc.info['memory_percent']:<6.1f}% NAME: {proc.info['name']}")
-            except Exception:
-                pass
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                # Process no longer exists or access denied
+                continue
         processes.sort(key=lambda x: float(x.split('CPU: ')[1].split('%')[0]), reverse=True)
         return "\n".join(processes[:50])
     except Exception as e:
@@ -1088,11 +1089,14 @@ async def get_installed_programs() -> str:
                                     except (OSError, ValueError):
                                         programs.append(name)
                                 except (OSError, ValueError):
-                                    pass
+                                    # Unable to read DisplayName from registry
+                                    continue
                         except (OSError, PermissionError):
-                            pass
-            except:
-                pass
+                            # Unable to access registry subkey
+                            continue
+            except (OSError, PermissionError):
+                # Unable to access registry path
+                continue
 
         # Remove duplicates and sort
         programs = sorted(list(set(programs)))
@@ -1123,10 +1127,12 @@ async def get_startup_programs() -> str:
                         try:
                             name, value, _ = winreg.EnumValue(key, i)
                             startup_info.append(f"{name}: {value}")
-                        except:
-                            pass
-            except:
-                pass
+                        except (OSError, PermissionError, ValueError):
+                            # Unable to read registry value
+                            continue
+            except (OSError, PermissionError):
+                # Unable to access startup registry key
+                continue
 
         if startup_info:
             return "Startup Programs:\n" + "\n".join(startup_info)
@@ -1340,7 +1346,8 @@ async def predict_next_action(context: str = "") -> str:
             try:
                 import json
                 context_dict = json.loads(context)
-            except:
+            except (json.JSONDecodeError, ValueError):
+                # Invalid JSON context, using default
                 pass
 
         result = ML_ENGINE['behavior_predictor'].predict_next_action(context_dict)
