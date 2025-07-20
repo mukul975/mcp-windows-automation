@@ -5662,8 +5662,7 @@ async def network_adapters_info() -> str:
     try:
         command = 'Get-NetAdapter | Format-Table Name,InterfaceDescription,Status,LinkSpeed,MacAddress -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=15
@@ -5681,8 +5680,7 @@ async def network_adapters_info() -> str:
 async def wifi_profiles_list() -> str:
     """List saved WiFi profiles"""
     try:
-        command = 'netsh wlan show profiles'
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=10)
+        result = subprocess.run(["netsh", "wlan", "show", "profiles"], capture_output=True, text=True, timeout=10)
         
         if result.returncode == 0:
             return f"WiFi Profiles:\n{result.stdout}"
@@ -5698,8 +5696,7 @@ async def dns_cache_info() -> str:
     try:
         command = 'Get-DnsClientCache | Format-Table Name,Type,Status,DataLength -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=15
@@ -5717,8 +5714,7 @@ async def dns_cache_info() -> str:
 async def flush_dns_cache() -> str:
     """Flush Windows DNS cache"""
     try:
-        command = 'ipconfig /flushdns'
-        result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=10)
+        result = subprocess.run(["ipconfig", "/flushdns"], capture_output=True, text=True, timeout=10)
         
         if result.returncode == 0:
             return f"DNS cache flushed successfully:\n{result.stdout}"
@@ -5736,10 +5732,8 @@ async def flush_dns_cache() -> str:
 async def system_file_checker() -> str:
     """Run System File Checker (SFC scan)"""
     try:
-        command = 'sfc /scannow'
         result = subprocess.run(
-            command,
-            shell=True,
+            ["sfc", "/scannow"],
             capture_output=True,
             text=True,
             timeout=3600  # SFC can take a long time
@@ -5756,16 +5750,14 @@ async def system_file_checker() -> str:
 async def disk_cleanup_analyze(drive: str = "C:") -> str:
     """Analyze disk for cleanup opportunities"""
     try:
-        command = f'cleanmgr /sageset:1 /d {drive}'
-        subprocess.run(command, shell=True, timeout=30)
+        subprocess.run(["cleanmgr", "/sageset:1", "/d", drive], timeout=30)
         
         # Get disk space info
         disk_command = f'Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID=\'{drive}\'")' + \
                       ' | Format-Table DeviceID,Size,FreeSpace,@{Name="UsedSpace";Expression={$_.Size-$_.FreeSpace}},@{Name="PercentFree";Expression={[math]::Round(($_.FreeSpace/$_.Size)*100,2)}} -AutoSize'
         
         result = subprocess.run(
-            f'powershell.exe -Command "{disk_command}"',
-            shell=True,
+            ["powershell.exe", "-Command", disk_command],
             capture_output=True,
             text=True,
             timeout=15
@@ -5785,8 +5777,7 @@ async def windows_update_status() -> str:
     try:
         command = 'Get-WindowsUpdate -MicrosoftUpdate | Format-Table Title,Size,Status -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "Install-Module PSWindowsUpdate -Force; {command}"',
-            shell=True,
+            ["powershell.exe", "-Command", f"Install-Module PSWindowsUpdate -Force; {command}"],
             capture_output=True,
             text=True,
             timeout=60
@@ -5798,8 +5789,7 @@ async def windows_update_status() -> str:
             # Fallback to basic update history
             fallback_command = 'Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object -First 10 | Format-Table HotFixID,Description,InstalledBy,InstalledOn -AutoSize'
             fallback_result = subprocess.run(
-                f'powershell.exe -Command "{fallback_command}"',
-                shell=True,
+                ["powershell.exe", "-Command", fallback_command],
                 capture_output=True,
                 text=True,
                 timeout=15
