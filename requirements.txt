@@ -3,8 +3,8 @@
 # Core MCP dependencies
 mcp>=1.0.0
 
-# Windows automation
-pyautogui>=0.9.54
+# Windows automation (Windows-only packages)
+pyautogui>=0.9.54; platform_system=="Windows"
 pywin32>=306; platform_system=="Windows"
 psutil>=5.9.0
 pillow>=10.0.0
@@ -17,9 +17,9 @@ webdriver-manager>=4.0.0
 opencv-python>=4.8.0
 numpy>=1.24.0
 
-# GUI frameworks
-tkinter-tooltip>=2.0.0
-customtkinter>=5.2.0
+# GUI frameworks (Windows/Desktop only)
+tkinter-tooltip>=2.0.0; platform_system=="Windows"
+customtkinter>=5.2.0; platform_system=="Windows"
 
 # HTTP and networking
 requests>=2.31.0
