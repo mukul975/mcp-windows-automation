@@ -418,8 +418,6 @@ async def ml_monitor_comprehensive_status() -> str:
 async def check_ml_system_processes() -> str:
     """Check if ML monitoring processes are running"""
     try:
-        processes_status = []
-
         # Check for Python processes related to monitoring
         command = '''
         $mlProcesses = Get-Process | Where-Object {
@@ -438,7 +436,8 @@ async def check_ml_system_processes() -> str:
                     }
                 }
             } catch {
-                # Ignore access denied errors
+                # Ignore access denied errors - this is expected for some processes
+                Write-Host "Access denied for process $($_.Id) - skipping"
             }
         }
 
@@ -605,8 +604,6 @@ async def analyze_data_quality() -> str:
         quality_report = []
 
         # Data freshness analysis
-        now = datetime.now()
-
         # Mock data freshness (in real implementation, check actual timestamps)
         freshness_data = {
             "Fresh (< 1h)": 45,
@@ -1531,8 +1528,8 @@ async def auto_optimize_system() -> str:
         if memory.percent > 80:
             optimizations.append("High memory usage - Consider clearing cache or restarting applications")
 
-        # Get behavior recommendations
-        recommendations = ML_ENGINE['recommendation_engine'].get_recommendations()
+        # Get behavior recommendations (for future use in optimization logic)
+        # recommendations = ML_ENGINE['recommendation_engine'].get_recommendations()
 
         result = "System Auto-Optimization Results:\n\n"
         result += f"Current CPU: {current_load:.1f}%\n"
@@ -1635,6 +1632,7 @@ async def stop_ml_monitoring() -> str:
             if success:
                 return "Integrated monitoring stopped successfully"
         except ImportError:
+            # Integrated monitoring bridge not available - fall back to legacy system
             pass
 
         # Fallback to legacy background monitoring
@@ -1717,7 +1715,7 @@ def background_monitoring():
                         import ctypes
                         from ctypes import wintypes
                         user32 = ctypes.windll.user32
-                        kernel32 = ctypes.windll.kernel32
+                        # kernel32 = ctypes.windll.kernel32  # Not used in this block
 
                         # Get active window handle
                         hwnd = user32.GetForegroundWindow()
@@ -1746,6 +1744,7 @@ def background_monitoring():
                                         previous_active_window = window_title
                                         ML_ENGINE['data_collector'].record_action('window_focus', window_title, 0.0)
                     except Exception as e2:
+                        # Fallback failed - continue without window detection
                         pass
 
                 # Process monitoring
@@ -1757,6 +1756,7 @@ def background_monitoring():
                         proc_info = f"{proc.name()}({proc.exe()})"
                         ML_ENGINE['data_collector'].record_action('launch', proc_info, 0.0)
                     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                        # Process no longer exists or access denied - skip
                         pass
                 previous_process_list = current_process_list
 
@@ -3666,6 +3666,7 @@ async def monitor_system_activity(duration: int = 60) -> str:
                     if active_window:
                         activity_log.append(f"{datetime.now().strftime('%H:%M:%S')} - Active: {active_window.title}")
             except (ImportError, AttributeError, OSError):
+                # UI automation not available or window access failed - skip monitoring
                 pass
 
             time.sleep(5)  # Check every 5 seconds
@@ -4674,7 +4675,6 @@ async def network_speed_test() -> str:
         for target in dns_targets:
             try:
                 start_time = time.time()
-                import socket
                 socket.gethostbyname(target)
                 resolve_time = (time.time() - start_time) * 1000
                 results.append(f"  {target}: {resolve_time:.0f}ms")
@@ -4689,9 +4689,6 @@ async def network_speed_test() -> str:
 async def scan_open_ports(target_host: str = "localhost", start_port: int = 1, end_port: int = 1000) -> str:
     """Scan for open ports on a target host"""
     try:
-        import socket
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-
         def scan_port(host, port):
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -4771,7 +4768,9 @@ async def fetch_web_content(url: str, extract_text: bool = True) -> str:
             text_content = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
             text_content = re.sub(r'<style[^>]*>.*?</style>', '', text_content, flags=re.DOTALL | re.IGNORECASE)
             # Use a more restrictive regex pattern for HTML tags to avoid issues with malformed HTML
-            text_content = re.sub(r'<[a-zA-Z/][^<>]*>', '', text_content)
+            # Only match well-formed HTML tags with proper structure
+            text_content = re.sub(r'<[a-zA-Z][a-zA-Z0-9]*(?:\s[^<>]*)?/?>', '', text_content)  # Opening tags
+            text_content = re.sub(r'</[a-zA-Z][a-zA-Z0-9]*>', '', text_content)  # Closing tags
 
             # Clean up whitespace
             text_content = re.sub(r'\s+', ' ', text_content).strip()
