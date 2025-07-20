@@ -54,6 +54,302 @@ mcp = FastMCP("unified-server")
 PREFERENCES_FILE = "user_preferences.json"
 
 # ==============================================================================
+# MICROSOFT OFFICE INTEGRATION
+# ==============================================================================
+
+class OfficeMCPIntegration:
+    def __init__(self):
+        self.office_commands = {
+            "Word": {
+                "InsertText": self.word_insert_text,
+                "ReplaceAllText": self.word_replace_all_text,
+                "GetSelection": self.word_get_selection,
+                "InsertParagraph": self.word_insert_paragraph,
+                "SetDocumentTitle": self.word_set_document_title
+            },
+            "Excel": {
+                "SetRangeValues": self.excel_set_range_values,
+                "GetRangeValues": self.excel_get_range_values,
+                "AddWorksheet": self.excel_add_worksheet,
+                "CreateChart": self.excel_create_chart,
+                "FormatRange": self.excel_format_range
+            },
+            "PowerPoint": {
+                "InsertSlide": self.powerpoint_insert_slide,
+                "DeleteSlide": self.powerpoint_delete_slide,
+                "SetSlideTitle": self.powerpoint_set_slide_title,
+                "AddTextBox": self.powerpoint_add_textbox
+            },
+            "Outlook": {
+                "CreateDraft": self.outlook_create_draft,
+                "SendEmail": self.outlook_send_email,
+                "GetCurrentMessage": self.outlook_get_current_message,
+                "AddAttachment": self.outlook_add_attachment
+            }
+        }
+    
+    def create_office_js_script(self, app: str, command: str, params: Dict[str, Any]) -> str:
+        """Generate Office.js script based on app, command, and parameters"""
+        
+        if app == "Word":
+            return self._generate_word_script(command, params)
+        elif app == "Excel":
+            return self._generate_excel_script(command, params)
+        elif app == "PowerPoint":
+            return self._generate_powerpoint_script(command, params)
+        elif app == "Outlook":
+            return self._generate_outlook_script(command, params)
+        else:
+            raise ValueError(f"Unsupported Office app: {app}")
+    
+    def _generate_word_script(self, command: str, params: Dict[str, Any]) -> str:
+        """Generate Word-specific Office.js script"""
+        
+        if command == "InsertText":
+            return f"""
+            Office.onReady(function() {{
+                Word.run(async function (context) {{
+                    const range = context.document.getSelection();
+                    range.insertText("{params.get('text', '')}", Word.InsertLocation.replace);
+                    await context.sync();
+                    return {{ status: "success", message: "Text inserted successfully" }};
+                }}).catch(function (error) {{
+                    console.error("Error: " + error);
+                    return {{ status: "error", message: error.message }};
+                }});
+            }});
+            """
+        
+        elif command == "ReplaceAllText":
+            return f"""
+            Office.onReady(function() {{
+                Word.run(async function (context) {{
+                    const searchResults = context.document.body.search("{params.get('search', '')}", {{matchCase: false}});
+                    context.load(searchResults, 'items');
+                    await context.sync();
+                    
+                    for (let i = 0; i < searchResults.items.length; i++) {{
+                        searchResults.items[i].insertText("{params.get('replace', '')}", Word.InsertLocation.replace);
+                    }}
+                    
+                    await context.sync();
+                    return {{ status: "success", message: "Text replaced successfully", count: searchResults.items.length }};
+                }}).catch(function (error) {{
+                    console.error("Error: " + error);
+                    return {{ status: "error", message: error.message }};
+                }});
+            }});
+            """
+        
+        return ""
+    
+    def _generate_excel_script(self, command: str, params: Dict[str, Any]) -> str:
+        """Generate Excel-specific Office.js script"""
+        
+        if command == "SetRangeValues":
+            values_json = json.dumps(params.get('values', []))
+            return f"""
+            Office.onReady(function() {{
+                Excel.run(async function (context) {{
+                    let sheet = context.workbook.worksheets.getItem("{params.get('sheet', 'Sheet1')}");
+                    let range = sheet.getRange("{params.get('range', 'A1')}");
+                    range.values = {values_json};
+                    await context.sync();
+                    return {{ status: "success", message: "Range values set successfully" }};
+                }}).catch(function (error) {{
+                    console.error("Error: " + error);
+                    return {{ status: "error", message: error.message }};
+                }});
+            }});
+            """
+        
+        elif command == "AddWorksheet":
+            return f"""
+            Office.onReady(function() {{
+                Excel.run(async function (context) {{
+                    let sheet = context.workbook.worksheets.add("{params.get('name', 'NewSheet')}");
+                    sheet.activate();
+                    await context.sync();
+                    return {{ status: "success", message: "Worksheet added successfully" }};
+                }}).catch(function (error) {{
+                    console.error("Error: " + error);
+                    return {{ status: "error", message: error.message }};
+                }});
+            }});
+            """
+        
+        return ""
+    
+    def _generate_powerpoint_script(self, command: str, params: Dict[str, Any]) -> str:
+        """Generate PowerPoint-specific Office.js script"""
+        
+        if command == "InsertSlide":
+            return f"""
+            Office.onReady(function() {{
+                PowerPoint.run(async function (context) {{
+                    const slide = context.presentation.slides.add();
+                    
+                    // Try to set title if provided
+                    if ("{params.get('title', '')}") {{
+                        // Add title placeholder logic here
+                        const titleShape = slide.shapes.getItemOrNullObject("Title 1");
+                        if (!titleShape.isNullObject) {{
+                            titleShape.textFrame.textRange.text = "{params.get('title', '')}";
+                        }}
+                    }}
+                    
+                    await context.sync();
+                    return {{ status: "success", message: "Slide inserted successfully" }};
+                }}).catch(function (error) {{
+                    console.error("Error: " + error);
+                    return {{ status: "error", message: error.message }};
+                }});
+            }});
+            """
+        
+        return ""
+    
+    def _generate_outlook_script(self, command: str, params: Dict[str, Any]) -> str:
+        """Generate Outlook-specific Office.js script"""
+        
+        if command == "CreateDraft":
+            return f"""
+            Office.onReady(function() {{
+                if (Office.context.mailbox.item) {{
+                    const item = Office.context.mailbox.item;
+                    
+                    // Set subject
+                    item.subject.setAsync("{params.get('subject', '')}", function(result) {{
+                        if (result.status === Office.AsyncResultStatus.Failed) {{
+                            console.error("Failed to set subject: " + result.error.message);
+                        }}
+                    }});
+                    
+                    // Set body
+                    item.body.setAsync("{params.get('body', '')}", {{coercionType: Office.CoercionType.Text}}, function(result) {{
+                        if (result.status === Office.AsyncResultStatus.Failed) {{
+                            console.error("Failed to set body: " + result.error.message);
+                        }}
+                    }});
+                    
+                    // Set recipients
+                    item.to.setAsync([{{emailAddress: "{params.get('to', '')}"}}], function(result) {{
+                        if (result.status === Office.AsyncResultStatus.Failed) {{
+                            console.error("Failed to set recipients: " + result.error.message);
+                        }}
+                    }});
+                    
+                    return {{ status: "success", message: "Draft created successfully" }};
+                }} else {{
+                    return {{ status: "error", message: "No mail item context available" }};
+                }}
+            }});
+            """
+        
+        return ""
+    
+    def execute_office_command(self, app: str, command: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute Office.js command via JavaScript injection"""
+        
+        try:
+            # Generate Office.js script
+            script = self.create_office_js_script(app, command, params)
+            
+            if not script:
+                return {"status": "error", "message": f"Unsupported command: {command} for {app}"}
+            
+            # Create temporary HTML file with Office.js script
+            html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+            </head>
+            <body>
+                <script>
+                    {script}
+                </script>
+            </body>
+            </html>
+            """
+            
+            # Save to temporary file
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False) as f:
+                f.write(html_content)
+                temp_file = f.name
+            
+            # For demonstration, we'll return a simulated response
+            # In a real implementation, you'd need to inject this into the Office application
+            return {
+                "status": "success",
+                "message": f"Office.js command prepared for {app}",
+                "command": command,
+                "params": params,
+                "script_file": temp_file
+            }
+            
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+    
+    # Individual command handlers
+    def word_insert_text(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Word", "InsertText", params)
+    
+    def word_replace_all_text(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Word", "ReplaceAllText", params)
+    
+    def word_get_selection(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Word", "GetSelection", params)
+    
+    def word_insert_paragraph(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Word", "InsertParagraph", params)
+    
+    def word_set_document_title(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Word", "SetDocumentTitle", params)
+    
+    def excel_set_range_values(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Excel", "SetRangeValues", params)
+    
+    def excel_get_range_values(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Excel", "GetRangeValues", params)
+    
+    def excel_add_worksheet(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Excel", "AddWorksheet", params)
+    
+    def excel_create_chart(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Excel", "CreateChart", params)
+    
+    def excel_format_range(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Excel", "FormatRange", params)
+    
+    def powerpoint_insert_slide(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("PowerPoint", "InsertSlide", params)
+    
+    def powerpoint_delete_slide(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("PowerPoint", "DeleteSlide", params)
+    
+    def powerpoint_set_slide_title(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("PowerPoint", "SetSlideTitle", params)
+    
+    def powerpoint_add_textbox(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("PowerPoint", "AddTextBox", params)
+    
+    def outlook_create_draft(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Outlook", "CreateDraft", params)
+    
+    def outlook_send_email(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Outlook", "SendEmail", params)
+    
+    def outlook_get_current_message(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Outlook", "GetCurrentMessage", params)
+    
+    def outlook_add_attachment(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        return self.execute_office_command("Outlook", "AddAttachment", params)
+
+# Global Office integration instance
+office_integration = OfficeMCPIntegration()
+
+# ==============================================================================
 # ML MONITOR STATUS TOOL
 # ==============================================================================
 
@@ -175,8 +471,7 @@ async def check_ml_system_processes() -> str:
         '''
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -673,8 +968,10 @@ async def open_app_with_url(app_name: str, url: str = "") -> str:
             'powershell': 'powershell.exe'
         }
         executable = app_mappings.get(app_name.lower(), app_name)
-        command = f'"{executable}" "{url}"' if url else executable
-        process = subprocess.Popen(command, shell=True)
+        if url:
+            process = subprocess.Popen([executable, url])
+        else:
+            process = subprocess.Popen([executable])
         return f"Opened {app_name} (PID: {process.pid})" + (f" with URL: {url}" if url else "")
     except Exception as e:
         return f"Error opening {app_name}: {str(e)}"
@@ -853,8 +1150,7 @@ async def run_command(command: str) -> str:
         if any(danger in command.lower() for danger in dangerous_commands):
             return f"BLOCKED: Potentially dangerous command: {command}"
         result = subprocess.run(
-            command,
-            shell=True,
+            ["cmd", "/c", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -1726,8 +2022,7 @@ async def wifi_profiles_list() -> str:
     """List saved WiFi profiles"""
     try:
         result = subprocess.run(
-            'netsh wlan show profiles',
-            shell=True,
+            ["netsh", "wlan", "show", "profiles"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1741,8 +2036,7 @@ async def wifi_scan_networks() -> str:
     """Scan for available WiFi networks"""
     try:
         result = subprocess.run(
-            'netsh wlan show profiles',
-            shell=True,
+            ["netsh", "wlan", "show", "profiles"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1750,8 +2044,7 @@ async def wifi_scan_networks() -> str:
         
         # Also get available networks
         scan_result = subprocess.run(
-            'netsh wlan show all',
-            shell=True,
+            ["netsh", "wlan", "show", "all"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1766,8 +2059,7 @@ async def wifi_connect_profile(profile_name: str) -> str:
     """Connect to a saved WiFi profile"""
     try:
         result = subprocess.run(
-            f'netsh wlan connect name="{profile_name}"',
-            shell=True,
+            ["netsh", "wlan", "connect", f'name={profile_name}'],
             capture_output=True,
             text=True,
             timeout=30
@@ -1785,8 +2077,7 @@ async def wifi_disconnect() -> str:
     """Disconnect from current WiFi network"""
     try:
         result = subprocess.run(
-            'netsh wlan disconnect',
-            shell=True,
+            ["netsh", "wlan", "disconnect"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1804,8 +2095,7 @@ async def wifi_delete_profile(profile_name: str) -> str:
     """Delete a saved WiFi profile"""
     try:
         result = subprocess.run(
-            f'netsh wlan delete profile name="{profile_name}"',
-            shell=True,
+            ["netsh", "wlan", "delete", "profile", f'name={profile_name}'],
             capture_output=True,
             text=True,
             timeout=30
@@ -1823,8 +2113,7 @@ async def wifi_show_profile_details(profile_name: str) -> str:
     """Show detailed information about a WiFi profile"""
     try:
         result = subprocess.run(
-            f'netsh wlan show profile name="{profile_name}"',
-            shell=True,
+            ["netsh", "wlan", "show", "profile", f'name={profile_name}'],
             capture_output=True,
             text=True,
             timeout=30
@@ -1839,8 +2128,7 @@ async def wifi_show_interfaces() -> str:
     """Show WiFi adapter interfaces and their status"""
     try:
         result = subprocess.run(
-            'netsh wlan show interfaces',
-            shell=True,
+            ["netsh", "wlan", "show", "interfaces"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1855,8 +2143,7 @@ async def wifi_show_drivers() -> str:
     """Show WiFi driver information"""
     try:
         result = subprocess.run(
-            'netsh wlan show drivers',
-            shell=True,
+            ["netsh", "wlan", "show", "drivers"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1871,8 +2158,7 @@ async def wifi_export_profile(profile_name: str, export_path: str = ".") -> str:
     """Export a WiFi profile to XML file"""
     try:
         result = subprocess.run(
-            f'netsh wlan export profile name="{profile_name}" folder="{export_path}"',
-            shell=True,
+            ["netsh", "wlan", "export", "profile", f'name={profile_name}', f'folder={export_path}'],
             capture_output=True,
             text=True,
             timeout=30
@@ -1893,8 +2179,7 @@ async def wifi_import_profile(xml_file_path: str) -> str:
             return f"XML file not found: {xml_file_path}"
         
         result = subprocess.run(
-            f'netsh wlan add profile filename="{xml_file_path}"',
-            shell=True,
+            ["netsh", "wlan", "add", "profile", f'filename={xml_file_path}'],
             capture_output=True,
             text=True,
             timeout=30
@@ -1913,8 +2198,7 @@ async def wifi_create_hotspot(ssid: str, password: str) -> str:
     try:
         # Set up hosted network
         setup_result = subprocess.run(
-            f'netsh wlan set hostednetwork mode=allow ssid="{ssid}" key="{password}"',
-            shell=True,
+            ["netsh", "wlan", "set", "hostednetwork", "mode=allow", f'ssid={ssid}', f'key={password}'],
             capture_output=True,
             text=True,
             timeout=30
@@ -1925,8 +2209,7 @@ async def wifi_create_hotspot(ssid: str, password: str) -> str:
         
         # Start the hosted network
         start_result = subprocess.run(
-            'netsh wlan start hostednetwork',
-            shell=True,
+            ["netsh", "wlan", "start", "hostednetwork"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1944,8 +2227,7 @@ async def wifi_stop_hotspot() -> str:
     """Stop the WiFi hotspot"""
     try:
         result = subprocess.run(
-            'netsh wlan stop hostednetwork',
-            shell=True,
+            ["netsh", "wlan", "stop", "hostednetwork"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1963,8 +2245,7 @@ async def wifi_hotspot_status() -> str:
     """Show WiFi hotspot status"""
     try:
         result = subprocess.run(
-            'netsh wlan show hostednetwork',
-            shell=True,
+            ["netsh", "wlan", "show", "hostednetwork"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1980,8 +2261,7 @@ async def wifi_signal_strength() -> str:
     try:
         # Get current connection info
         current_result = subprocess.run(
-            'netsh wlan show interfaces',
-            shell=True,
+            ["netsh", "wlan", "show", "interfaces"],
             capture_output=True,
             text=True,
             timeout=30
@@ -1989,8 +2269,7 @@ async def wifi_signal_strength() -> str:
         
         # Get nearby networks with signal strength
         nearby_result = subprocess.run(
-            'netsh wlan show profiles',
-            shell=True,
+            ["netsh", "wlan", "show", "profiles"],
             capture_output=True,
             text=True,
             timeout=30
@@ -2006,8 +2285,7 @@ async def wifi_network_report() -> str:
     try:
         # Generate WLAN report
         report_result = subprocess.run(
-            'netsh wlan show wlanreport',
-            shell=True,
+            ["netsh", "wlan", "show", "wlanreport"],
             capture_output=True,
             text=True,
             timeout=60
@@ -2023,8 +2301,7 @@ async def wifi_adapter_reset() -> str:
     try:
         # Get WiFi adapter name first
         adapter_result = subprocess.run(
-            'netsh interface show interface',
-            shell=True,
+            ["netsh", "interface", "show", "interface"],
             capture_output=True,
             text=True,
             timeout=30
@@ -2032,8 +2309,7 @@ async def wifi_adapter_reset() -> str:
         
         # Try to reset wireless adapter
         reset_result = subprocess.run(
-            'netsh interface set interface "Wi-Fi" admin=disable',
-            shell=True,
+            ["netsh", "interface", "set", "interface", "Wi-Fi", "admin=disable"],
             capture_output=True,
             text=True,
             timeout=30
@@ -2042,8 +2318,7 @@ async def wifi_adapter_reset() -> str:
         time.sleep(3)  # Wait a moment
         
         enable_result = subprocess.run(
-            'netsh interface set interface "Wi-Fi" admin=enable',
-            shell=True,
+            ["netsh", "interface", "set", "interface", "Wi-Fi", "admin=enable"],
             capture_output=True,
             text=True,
             timeout=30
@@ -2059,8 +2334,7 @@ async def wifi_troubleshoot() -> str:
     try:
         # Run network diagnostics
         diag_result = subprocess.run(
-            'msdt.exe /id NetworkDiagnosticsNetworkAdapter',
-            shell=True,
+            ["msdt.exe", "/id", "NetworkDiagnosticsNetworkAdapter"],
             capture_output=True,
             text=True,
             timeout=60
@@ -2068,8 +2342,7 @@ async def wifi_troubleshoot() -> str:
         
         # Get network configuration
         config_result = subprocess.run(
-            'ipconfig /all',
-            shell=True,
+            ["ipconfig", "/all"],
             capture_output=True,
             text=True,
             timeout=30
@@ -2085,8 +2358,7 @@ async def wifi_power_management() -> str:
     try:
         # Get power management settings via PowerShell
         power_result = subprocess.run(
-            'powershell.exe "Get-NetAdapterPowerManagement | Format-List"',
-            shell=True,
+            ["powershell.exe", "Get-NetAdapterPowerManagement | Format-List"],
             capture_output=True,
             text=True,
             timeout=30
@@ -2104,8 +2376,7 @@ async def wifi_security_audit() -> str:
         
         # Get all profiles
         profiles_result = subprocess.run(
-            'netsh wlan show profiles',
-            shell=True,
+            ["netsh", "wlan", "show", "profiles"],
             capture_output=True,
             text=True,
             timeout=30
@@ -2125,8 +2396,7 @@ async def wifi_security_audit() -> str:
             try:
                 # Get profile details
                 detail_result = subprocess.run(
-                    f'netsh wlan show profile name="{profile}"',
-                    shell=True,
+                    ["netsh", "wlan", "show", "profile", f'name={profile}'],
                     capture_output=True,
                     text=True,
                     timeout=30
@@ -4657,8 +4927,7 @@ async def service_manager(action: str, service_name: str = "") -> str:
     try:
         if action == "list":
             result = subprocess.run(
-                'Get-Service | Select-Object Name, Status, StartType | Format-Table -AutoSize',
-                shell=True,
+                ["powershell.exe", "-Command", "Get-Service | Select-Object Name, Status, StartType | Format-Table -AutoSize"],
                 capture_output=True,
                 text=True,
                 timeout=30
@@ -4667,8 +4936,7 @@ async def service_manager(action: str, service_name: str = "") -> str:
             
         elif action == "status" and service_name:
             result = subprocess.run(
-                f'Get-Service -Name "{service_name}" | Format-List',
-                shell=True,
+                ["powershell.exe", "-Command", f'Get-Service -Name "{service_name}" | Format-List'],
                 capture_output=True,
                 text=True,
                 timeout=10
@@ -4681,12 +4949,12 @@ async def service_manager(action: str, service_name: str = "") -> str:
         elif action in ["start", "stop", "restart"] and service_name:
             if action == "restart":
                 # Stop then start
-                subprocess.run(f'Stop-Service -Name "{service_name}" -Force', shell=True, capture_output=True)
+                subprocess.run(["powershell.exe", "-Command", f'Stop-Service -Name "{service_name}" -Force'], capture_output=True)
                 time.sleep(2)
-                result = subprocess.run(f'Start-Service -Name "{service_name}"', shell=True, capture_output=True, text=True)
+                result = subprocess.run(["powershell.exe", "-Command", f'Start-Service -Name "{service_name}"'], capture_output=True, text=True)
             else:
                 verb = "Start" if action == "start" else "Stop"
-                result = subprocess.run(f'{verb}-Service -Name "{service_name}"', shell=True, capture_output=True, text=True)
+                result = subprocess.run(["powershell.exe", "-Command", f'{verb}-Service -Name "{service_name}"'], capture_output=True, text=True)
             
             if result.returncode == 0:
                 return f"Successfully {action}ed service: {service_name}"
@@ -4935,8 +5203,11 @@ async def registry_read_key(hive: str, key_path: str, value_name: str = "") -> s
 async def registry_backup_key(hive: str, key_path: str, backup_file: str) -> str:
     """Backup a registry key to a .reg file"""
     try:
-        command = f'reg export "{hive}\\{key_path}" "{backup_file}" /y'
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(
+            ["reg", "export", f"{hive}\\{key_path}", backup_file, "/y"],
+            capture_output=True,
+            text=True
+        )
         
         if result.returncode == 0:
             return f"Registry key backed up to: {backup_file}"
@@ -4962,8 +5233,7 @@ async def service_list_all(status_filter: str = "all") -> str:
             command = 'Get-Service | Format-Table Name,Status,StartType -AutoSize'
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -4995,8 +5265,7 @@ async def service_control(service_name: str, action: str) -> str:
         
         command = actions_map[action.lower()]
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -5020,8 +5289,7 @@ async def windows_features_list() -> str:
     try:
         command = 'Get-WindowsOptionalFeature -Online | Format-Table FeatureName,State -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=60
@@ -5335,8 +5603,7 @@ async def system_uptime() -> str:
     try:
         command = '(Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime | Format-Table Days,Hours,Minutes,Seconds -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=10
@@ -5381,8 +5648,7 @@ async def device_manager_info() -> str:
     try:
         command = 'Get-PnpDevice | Where-Object {$_.Status -ne "OK"} | Format-Table InstanceId,FriendlyName,Status,Class -AutoSize'
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -7122,8 +7388,7 @@ async def monitor_resolution_change(width: int, height: int, refresh_rate: int =
         '''
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=15
@@ -7174,8 +7439,7 @@ async def monitor_power_settings() -> str:
         '''
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
@@ -7227,8 +7491,7 @@ async def monitor_color_profile() -> str:
         '''
         
         result = subprocess.run(
-            f'powershell.exe -Command "{command}"',
-            shell=True,
+            ["powershell.exe", "-Command", command],
             capture_output=True,
             text=True,
             timeout=30
