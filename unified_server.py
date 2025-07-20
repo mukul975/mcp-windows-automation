@@ -4768,22 +4768,23 @@ async def fetch_web_content(url: str, extract_text: bool = True) -> str:
             title_match = re.search(r'<title>(.*?)</title>', content, re.IGNORECASE | re.DOTALL)
             title = title_match.group(1).strip() if title_match else "No title found"
 
-            # Remove HTML tags and extract text using more secure patterns
-            # Fix CodeQL alert: Use proper regex patterns that handle malformed tags
+            # Remove HTML tags and extract text using secure patterns
+            # Fix CodeQL alert: Use proper regex patterns that handle malformed tags including
+            # cases like </script\t\n bar> by allowing any content between tag name and closing bracket
             
-            # Remove script blocks - handle various end tag formats including spaces
-            text_content = re.sub(r'<script(?:\s[^>]*)?>.*?</script\s*>', '', content, flags=re.DOTALL | re.IGNORECASE)
+            # Remove script blocks - handle malformed end tags with any content
+            text_content = re.sub(r'<script(?:\s[^>]*)?>.*?</script[^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
             
-            # Remove style blocks - handle various end tag formats including spaces  
-            text_content = re.sub(r'<style(?:\s[^>]*)?>.*?</style\s*>', '', text_content, flags=re.DOTALL | re.IGNORECASE)
+            # Remove style blocks - handle malformed end tags with any content
+            text_content = re.sub(r'<style(?:\s[^>]*)?>.*?</style[^>]*>', '', text_content, flags=re.DOTALL | re.IGNORECASE)
             
-            # Remove comments
+            # Remove comments (including malformed ones)
             text_content = re.sub(r'<!--.*?-->', '', text_content, flags=re.DOTALL)
             
-            # Use a more restrictive regex pattern for HTML tags to avoid security issues
+            # Use a more restrictive regex pattern for remaining HTML tags to avoid security issues
             # Only match well-formed HTML tags with proper structure
             text_content = re.sub(r'<[a-zA-Z][a-zA-Z0-9]*(?:\s[^<>]*)?/?>', '', text_content)  # Opening/self-closing tags
-            text_content = re.sub(r'</[a-zA-Z][a-zA-Z0-9]*\s*>', '', text_content)  # Closing tags with optional spaces
+            text_content = re.sub(r'</[a-zA-Z][a-zA-Z0-9]*[^>]*>', '', text_content)  # Closing tags with any content before >
 
             # Clean up whitespace
             text_content = re.sub(r'\s+', ' ', text_content).strip()
