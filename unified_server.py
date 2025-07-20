@@ -520,8 +520,8 @@ async def get_data_collection_summary() -> str:
 
                             summary.append(f"[DATA] {table_name}: {count} total records")
                             summary.append(f"    Recent Activity: {recent_1h} (1h) | {recent_24h} (24h)")
-                        except:
-                            summary.append(f"[DATA] {table_name}: {count} total records")
+                        except (sqlite3.OperationalError, sqlite3.DatabaseError) as e:
+                            summary.append(f"[DATA] {table_name}: {count} total records (timestamp query failed)")
 
                     conn.close()
 
@@ -691,8 +691,8 @@ async def check_integration_bridge() -> str:
                                 bridge_status.append(f"     {line.strip()[:80]}...")
                         else:
                             bridge_status.append("   (Empty log file)")
-                except:
-                    bridge_status.append("   (Unable to read log content)")
+                except (OSError, UnicodeDecodeError) as e:
+                    bridge_status.append(f"   (Unable to read log content: {str(e)[:30]})")
         else:
             bridge_status.append("🌉 Integration Bridge:")
             bridge_status.append("   ⚠️ No bridge activity logs found")
@@ -1594,33 +1594,32 @@ async def start_ml_monitoring() -> str:
             return "Failed to start integrated monitoring"
 
     except ImportError as e:
-        # Fallback to old system
-        return f"Integrated monitoring not available, using fallback: {e}"
+        # Fallback to old system - continue with legacy monitoring
+        try:
+            # Record initial metrics
+            ML_ENGINE['data_collector'].record_system_metrics()
+
+            # Start comprehensive user monitoring
+            if start_comprehensive_monitoring():
+                # Also start background ML monitoring
+                started = start_background_monitoring()
+
+                # Create setup flag file to mark initial activation
+                try:
+                    with open(ML_SETUP_FLAG_FILE, 'w') as f:
+                        f.write(f"ML monitoring setup completed at {datetime.now().isoformat()}")
+                    setup_message = " (First-time setup completed - ML monitoring will now auto-start on future server launches)"
+                except Exception as setup_error:
+                    print(f"Warning: Could not create setup flag file: {setup_error}")
+                    setup_message = ""
+
+                return "Comprehensive ML monitoring started - all user actions and system metrics will be recorded automatically" + setup_message
+            else:
+                return "Comprehensive monitoring already running"
+        except Exception as fallback_error:
+            return f"Error starting comprehensive monitoring: {str(fallback_error)}"
     except Exception as e:
         return f"Error starting integrated monitoring: {str(e)}"
-
-        # Record initial metrics
-        ML_ENGINE['data_collector'].record_system_metrics()
-
-        # Start comprehensive user monitoring
-        if start_comprehensive_monitoring():
-            # Also start background ML monitoring
-            started = start_background_monitoring()
-
-            # Create setup flag file to mark initial activation
-            try:
-                with open(ML_SETUP_FLAG_FILE, 'w') as f:
-                    f.write(f"ML monitoring setup completed at {datetime.now().isoformat()}")
-                setup_message = " (First-time setup completed - ML monitoring will now auto-start on future server launches)"
-            except Exception as e:
-                print(f"Warning: Could not create setup flag file: {e}")
-                setup_message = ""
-
-            return "Comprehensive ML monitoring started - all user actions and system metrics will be recorded automatically" + setup_message
-        else:
-            return "Comprehensive monitoring already running"
-    except Exception as e:
-        return f"Error starting comprehensive monitoring: {str(e)}"
 
 @mcp.tool()
 async def stop_ml_monitoring() -> str:
@@ -1742,7 +1741,7 @@ def background_monitoring():
                                     if window_title != previous_active_window:
                                         previous_active_window = window_title
                                         ML_ENGINE['data_collector'].record_action('window_focus', f"{process_name}: {window_title}", 0.0)
-                                except:
+                                except (psutil.NoSuchProcess, psutil.AccessDenied, OSError):
                                     if window_title != previous_active_window:
                                         previous_active_window = window_title
                                         ML_ENGINE['data_collector'].record_action('window_focus', window_title, 0.0)
@@ -1771,7 +1770,7 @@ def background_monitoring():
                     key_pressed = any(keyboard.is_pressed(key) for key in common_keys)
                     if key_pressed:
                         ML_ENGINE['data_collector'].record_action('keyboard', 'user', 0.0)
-                except:
+                except (ImportError, OSError, AttributeError):
                     pass  # Skip keyboard monitoring if there are issues
 
                 # Get current counts
@@ -2421,8 +2420,8 @@ async def wifi_security_audit() -> str:
                 else:
                     security_report.append("  Security: Unknown")
 
-            except Exception:
-                security_report.append(f"\n[{profile}] - Error analyzing security")
+            except (subprocess.SubprocessError, OSError, subprocess.TimeoutExpired) as e:
+                security_report.append(f"\n[{profile}] - Error analyzing security: {str(e)[:50]}")
 
         return "\n".join(security_report)
     except Exception as e:
@@ -2680,7 +2679,7 @@ class ChromeAutomation:
                     clicked_buttons.append(f"Clicked at ({x}, {y})")
                     time.sleep(2)
 
-                except Exception as e:
+                except (OSError, ValueError, TypeError):
                     continue
 
             # Method 2: Use keyboard shortcuts that might accept cookies
@@ -2695,7 +2694,7 @@ class ChromeAutomation:
                     pyautogui.hotkey(*shortcut)
                     clicked_buttons.append(f"Used shortcut: {'+'.join(shortcut)}")
                     time.sleep(1)
-                except:
+                except (OSError, ImportError, AttributeError):
                     continue
 
             if clicked_buttons:
@@ -3666,7 +3665,7 @@ async def monitor_system_activity(duration: int = 60) -> str:
                     active_window = gw.getActiveWindow()
                     if active_window:
                         activity_log.append(f"{datetime.now().strftime('%H:%M:%S')} - Active: {active_window.title}")
-            except:
+            except (ImportError, AttributeError, OSError):
                 pass
 
             time.sleep(5)  # Check every 5 seconds
@@ -4581,7 +4580,7 @@ async def system_health_check() -> str:
                         health_report.append(f"Temperature ({entry.label or name}): {entry.current}°C")
                         if entry.current > 80:
                             warnings.append(f"High temperature on {entry.label or name}")
-        except:
+        except (AttributeError, OSError, ImportError):
             health_report.append("Temperature: Not available")
 
         # 8. Battery (if laptop)
@@ -4591,7 +4590,7 @@ async def system_health_check() -> str:
                 health_report.append(f"Battery: {battery.percent}% ({'Charging' if battery.power_plugged else 'Discharging'})")
                 if battery.percent < 20 and not battery.power_plugged:
                     warnings.append("Low battery level")
-        except:
+        except (AttributeError, OSError, ImportError):
             health_report.append("Battery: Desktop system")
 
         result = "🏥 SYSTEM HEALTH CHECK\n" + "="*50 + "\n"
@@ -4649,7 +4648,7 @@ async def network_speed_test() -> str:
                         results.append(f"  {name}: Connected")
                 else:
                     results.append(f"  {name}: Failed")
-            except:
+            except (subprocess.SubprocessError, OSError, subprocess.TimeoutExpired):
                 results.append(f"  {name}: Timeout")
 
         # 2. Simple download speed test
@@ -4699,7 +4698,7 @@ async def scan_open_ports(target_host: str = "localhost", start_port: int = 1, e
                     sock.settimeout(1)
                     result = sock.connect_ex((host, port))
                     return port if result == 0 else None
-            except:
+            except (OSError, ConnectionError, socket.error):
                 return None
 
         open_ports = []
@@ -4771,7 +4770,8 @@ async def fetch_web_content(url: str, extract_text: bool = True) -> str:
             # Remove HTML tags and extract text
             text_content = re.sub(r'<script[^>]*>.*?</script>', '', content, flags=re.DOTALL | re.IGNORECASE)
             text_content = re.sub(r'<style[^>]*>.*?</style>', '', text_content, flags=re.DOTALL | re.IGNORECASE)
-            text_content = re.sub(r'<[^>]+>', '', text_content)
+            # Use a more restrictive regex pattern for HTML tags to avoid issues with malformed HTML
+            text_content = re.sub(r'<[a-zA-Z/][^<>]*>', '', text_content)
 
             # Clean up whitespace
             text_content = re.sub(r'\s+', ' ', text_content).strip()
@@ -6338,6 +6338,8 @@ async def get_ml_monitor_detailed_status() -> str:
 
         # Detailed Data Analysis
         ml_data_file = base_dir / "ml_data.json"
+        # Initialize ml_data to safe default values
+        ml_data = {'actions': [], 'metrics': []}
         if ml_data_file.exists():
             with open(ml_data_file, 'r') as f:
                 ml_data = json.load(f)
@@ -6395,8 +6397,8 @@ async def get_ml_monitor_detailed_status() -> str:
                 db_activities = cursor.fetchone()[0]
                 conn.close()
                 status_report.append(f"  📊 Data flow: SQLite({db_activities}) → JSON({json_actions})")
-            except:
-                status_report.append("  ⚠️  Unable to check data flow")
+            except (sqlite3.Error, OSError) as e:
+                status_report.append(f"  ⚠️  Unable to check data flow: {str(e)[:30]}")
 
         if json_actions > 0 and db_activities > 0:
             ratio = json_actions / db_activities
@@ -6578,8 +6580,8 @@ async def wifi_profiles_list() -> str:
                         else:
                             detailed_info.append(f"  Password: [Hidden/None]")
                     detailed_info.append("  ---")
-            except:
-                detailed_info.append(f"Profile: {profile} - Error getting details")
+            except (subprocess.SubprocessError, OSError, subprocess.TimeoutExpired) as e:
+                detailed_info.append(f"Profile: {profile} - Error getting details: {str(e)[:50]}")
                 detailed_info.append("  ---")
 
         return "\n".join(detailed_info)
