@@ -14,7 +14,7 @@
 
 <div class="badge">
   <img src="https://img.shields.io/github/license/mukul975/mcp-windows-automation" alt="License" />
-  <img src="https://img.shields.io/badge/Python-3.7%2B-blue" alt="Python Version" />
+  <img src="https://img.shields.io/badge/Python-3.10%2B-blue" alt="Python Version" />
   <img src="https://img.shields.io/badge/Platform-Windows%2010%2F11-lightgrey" alt="Platform" />
   <img src="https://img.shields.io/badge/AI-Assistant%20Ready-brightgreen" alt="AI Ready" />
 </div>
