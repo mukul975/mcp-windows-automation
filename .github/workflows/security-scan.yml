@@ -37,6 +37,17 @@ jobs:
         cache-dependency-path: 'requirements.txt'
       timeout-minutes: 10
 
+    - name: ✅ Verify Python Version (Must be 3.10+)
+      run: |
+        python_version=$(python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+        echo "Python version detected: $python_version"
+        if [[ "$python_version" < "3.10" ]]; then
+          echo "❌ ERROR: This workflow requires Python 3.10+ but found $python_version"
+          echo "This indicates an old workflow is running. Please cancel old workflow runs."
+          exit 1
+        fi
+        echo "✅ Python version $python_version is compatible with MCP library"
+
     - name: 📦 Install dependencies
       timeout-minutes: 15
       run: |
