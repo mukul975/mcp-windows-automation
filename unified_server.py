@@ -6,7 +6,6 @@ With Advanced UI Automation and Application Interaction
 
 import os
 import subprocess
-
 import platform
 import json
 import shutil
@@ -14,16 +13,22 @@ import time
 import psutil
 import webbrowser
 import tempfile
+import urllib.request
+import urllib.parse
+import urllib.error
+import socket
+import re
+import threading
+import random
 from pathlib import Path
+from datetime import datetime
+from typing import Dict, Any
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from mcp.server.fastmcp import FastMCP
 import ctypes
 from ctypes import wintypes
 import winreg
-
-import threading
-
-from datetime import datetime
 
 # Advanced UI Automation imports
 try:
