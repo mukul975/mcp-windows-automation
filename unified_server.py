@@ -25,9 +25,40 @@ from typing import Dict, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from mcp.server.fastmcp import FastMCP
-import ctypes
-from ctypes import wintypes
-import winreg
+
+# Logging configuration
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('mcp_server.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger('mcp-windows-automation')
+
+# Platform check
+IS_WINDOWS = platform.system() == "Windows"
+
+# Windows-specific imports
+if IS_WINDOWS:
+    import ctypes
+    from ctypes import wintypes
+    import winreg
+else:
+    # Mock Windows modules for non-Windows platforms
+    ctypes = None
+    wintypes = None
+    winreg = None
+
+def windows_only(func):
+    """Decorator to mark functions as Windows-only"""
+    async def wrapper(*args, **kwargs):
+        if not IS_WINDOWS:
+            return f"Error: {func.__name__} is only available on Windows systems"
+        return await func(*args, **kwargs)
+    return wrapper
 
 # Advanced UI Automation imports
 try:
@@ -194,10 +225,35 @@ class OfficeMCPIntegration:
 
                     // Try to set title if provided
                     if ("{params.get('title', '')}") {{
-                        // Add title placeholder logic here
-                        const titleShape = slide.shapes.getItemOrNullObject("Title 1");
-                        if (!titleShape.isNullObject) {{
-                            titleShape.textFrame.textRange.text = "{params.get('title', '')}";
+                        // Find and set title placeholder
+                        const titleShapes = slide.shapes.getByTypes(PowerPoint.ShapeType.placeholder);
+                        await context.sync();
+                        
+                        let titleSet = false;
+                        for (let i = 0; i < titleShapes.items.length; i++) {{
+                            const shape = titleShapes.items[i];
+                            if (shape.placeholder && shape.placeholder.type === PowerPoint.PlaceholderType.title) {{
+                                shape.textFrame.textRange.text = "{params.get('title', '')}";
+                                titleSet = true;
+                                break;
+                            }}
+                        }}
+                        
+                        // Fallback: try common title shape names if placeholder method failed
+                        if (!titleSet) {{
+                            const fallbackTitles = ["Title 1", "Title Placeholder", "Click to add title"];
+                            for (const titleName of fallbackTitles) {{
+                                try {{
+                                    const titleShape = slide.shapes.getItemOrNullObject(titleName);
+                                    await context.sync();
+                                    if (!titleShape.isNullObject) {{
+                                        titleShape.textFrame.textRange.text = "{params.get('title', '')}";
+                                        break;
+                                    }}
+                                }} catch (e) {{
+                                    // Continue to next fallback
+                                }}
+                            }}
                         }}
                     }}
 
@@ -358,7 +414,16 @@ office_integration = OfficeMCPIntegration()
 
 @mcp.tool()
 async def ml_monitor_comprehensive_status() -> str:
-    """Comprehensive ML monitoring system status with data analytics and training readiness"""
+    """
+    Get comprehensive ML monitoring system status with data analytics and training readiness.
+    
+    Returns:
+        str: Detailed status report including system monitoring, data collection summary,
+             training readiness assessment, and data quality metrics.
+    
+    Raises:
+        Exception: If system monitoring fails or data cannot be accessed.
+    """
     try:
         import json
         import sqlite3
@@ -420,7 +485,16 @@ async def ml_monitor_comprehensive_status() -> str:
 
 @mcp.tool()
 async def check_ml_system_processes() -> str:
-    """Check if ML monitoring processes are running"""
+    """
+    Check if ML monitoring processes are currently running on the system.
+    
+    Returns:
+        str: Status report of running ML monitoring processes including PID, memory usage,
+             and process types (Unified Server, Monitoring Service, ML Engine).
+    
+    Raises:
+        Exception: If process enumeration fails or system access is denied.
+    """
     try:
         # Check for Python processes related to monitoring
         command = '''
@@ -486,7 +560,16 @@ async def check_ml_system_processes() -> str:
 
 @mcp.tool()
 async def get_data_collection_summary() -> str:
-    """Get comprehensive data collection statistics"""
+    """
+    Get comprehensive data collection statistics from all monitoring sources.
+    
+    Returns:
+        str: Summary of data collection including user preferences, SQLite databases,
+             record counts, and recent activity metrics for the last 1 hour and 24 hours.
+    
+    Raises:
+        Exception: If database access fails or file system cannot be read.
+    """
     try:
         summary = []
 
@@ -820,9 +903,6 @@ import tempfile
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
-import ctypes
-from ctypes import wintypes
-import winreg
 
 import threading
 
@@ -1658,9 +1738,36 @@ except Exception as e:
 
 @mcp.tool()
 async def record_user_action(action_type: str, application: str, duration: float = 1.0, success: bool = True) -> str:
-    """Record a user action for ML training"""
+    """
+    Record a user action for machine learning training and behavior analysis.
+    
+    Args:
+        action_type (str): Type of action performed (e.g., 'click', 'type', 'scroll', 'open_app')
+        application (str): Name of the application where the action occurred
+        duration (float, optional): Duration of the action in seconds. Defaults to 1.0.
+        success (bool, optional): Whether the action was successful. Defaults to True.
+    
+    Returns:
+        str: Confirmation message with recorded action details or error message if ML engine unavailable.
+    
+    Raises:
+        Exception: If action recording fails or data storage encounters an error.
+    """
     if not ML_AVAILABLE:
         return "ML engine not available"
+
+    # Input validation
+    if not action_type or not isinstance(action_type, str):
+        return "Error: action_type must be a non-empty string"
+    
+    if not application or not isinstance(application, str):
+        return "Error: application must be a non-empty string"
+    
+    if not isinstance(duration, (int, float)) or duration <= 0:
+        return "Error: duration must be a positive number"
+    
+    if not isinstance(success, bool):
+        return "Error: success must be a boolean value"
 
     try:
         ML_ENGINE['data_collector'].record_action(action_type, application, duration, success)
@@ -1670,7 +1777,15 @@ async def record_user_action(action_type: str, application: str, duration: float
 
 @mcp.tool()
 async def record_system_metrics() -> str:
-    """Record current system metrics for ML training"""
+    """
+    Record current system metrics for machine learning training and performance analysis.
+    
+    Returns:
+        str: Confirmation message with recorded metrics summary or error message if ML engine unavailable.
+    
+    Raises:
+        Exception: If system metrics collection fails or data storage encounters an error.
+    """
     if not ML_AVAILABLE:
         return "ML engine not available"
 
@@ -2063,7 +2178,7 @@ ML_MONITOR_THREAD = None
 if ML_AVAILABLE:
     import threading
     import time
-    import datetime
+    # import datetime  # Removed to avoid conflict with datetime class import
 
     # Check if ML monitoring has been set up before
     ML_SETUP_FLAG_FILE = "ml_monitoring_setup.flag"
@@ -3277,9 +3392,13 @@ async def close_web_automation() -> str:
 # ==============================================================================
 
 # Importing office MCP tools
-from office_mcp_server import OfficeMCPIntegration
-
-office_integration = OfficeMCPIntegration()
+try:
+    from office_mcp_server import OfficeMCPIntegration
+    office_integration = OfficeMCPIntegration()
+    OFFICE_INTEGRATION_AVAILABLE = True
+except ImportError:
+    office_integration = None
+    OFFICE_INTEGRATION_AVAILABLE = False
 
 @mcp.tool()
 async def office_execute_command(app: str, command: str, params_json: str) -> str:
@@ -3450,10 +3569,36 @@ async def spotify_click_element(element: str) -> str:
     """Click specified element in Spotify"""
     try:
         await focus_window("Spotify")
-        # Coordinate-based clicks would typically use PyAutoGUI
-        # This is a simplified placeholder example
+        # Use proper Spotify window interaction
         if element.lower() == "now playing":
-            pyautogui.click(100, 200)  # Hypothetical coordinates
+            # Try to find the now playing area in Spotify window
+            try:
+                spotify_window = gw.getWindowsWithTitle("Spotify")[0]
+                # Click in the center-bottom area where now playing typically is
+                center_x = spotify_window.left + spotify_window.width // 2
+                now_playing_y = spotify_window.top + spotify_window.height - 100
+                pyautogui.click(center_x, now_playing_y)
+            except (IndexError, AttributeError):
+                # Fallback to approximate screen coordinates
+                pyautogui.click(960, 1000)  # Bottom center of typical screen
+        elif element.lower() == "play button":
+            # Click play/pause button area
+            try:
+                spotify_window = gw.getWindowsWithTitle("Spotify")[0]
+                center_x = spotify_window.left + spotify_window.width // 2
+                controls_y = spotify_window.top + spotify_window.height - 60
+                pyautogui.click(center_x, controls_y)
+            except (IndexError, AttributeError):
+                pyautogui.click(960, 1040)  # Play button area
+        else:
+            # Generic click in Spotify window center
+            try:
+                spotify_window = gw.getWindowsWithTitle("Spotify")[0]
+                center_x = spotify_window.left + spotify_window.width // 2
+                center_y = spotify_window.top + spotify_window.height // 2
+                pyautogui.click(center_x, center_y)
+            except (IndexError, AttributeError):
+                pyautogui.click(960, 540)  # Screen center fallback
         return f"✅ Spotify: Clicked {element}"
     except Exception as e:
         return f"❌ Error clicking element: {str(e)}"
@@ -4091,7 +4236,21 @@ async def monitor_system_activity(duration: int = 60) -> str:
 
 @mcp.tool()
 async def monitor_for_security_issues() -> str:
-    """Monitor for potential security issues"""
+    """
+    Monitor system for potential security issues and threats.
+    
+    Returns:
+        str: Comprehensive security report including suspicious processes, high resource usage,
+             security event log warnings/errors, system errors, network connections, and Windows Defender status.
+    
+    Raises:
+        Exception: If security monitoring fails or system access is denied.
+    
+    Security:
+        - Uses predefined PowerShell commands (no user input)
+        - Read-only operations with timeout protection
+        - Monitors system logs and processes for anomalies
+    """
     try:
         import subprocess
         import re
@@ -5342,8 +5501,52 @@ async def advanced_process_manager(action: str, process_identifier: str = "", si
 
 @mcp.tool()
 async def service_manager(action: str, service_name: str = "") -> str:
-    """Manage Windows services"""
+    """
+    Manage Windows services with secure input validation.
+    
+    Args:
+        action (str): Action to perform - 'list', 'status', 'start', 'stop', or 'restart'
+        service_name (str, optional): Name of the service to manage. Required for non-list actions.
+    
+    Returns:
+        str: Service management result or error message.
+    
+    Raises:
+        Exception: If service management fails or invalid parameters provided.
+    
+    Security:
+        - Input validation prevents command injection
+        - Service names are sanitized to alphanumeric characters, hyphens, and underscores only
+        - Actions are restricted to predefined safe operations
+    """
     try:
+        # Input validation and sanitization
+        if not action or not isinstance(action, str):
+            return "Error: action must be a non-empty string"
+        
+        action = action.lower().strip()
+        valid_actions = ["list", "status", "start", "stop", "restart"]
+        if action not in valid_actions:
+            return f"Error: action must be one of {valid_actions}"
+        
+        # Sanitize service name to prevent command injection
+        if service_name:
+            if not isinstance(service_name, str):
+                return "Error: service_name must be a string"
+            
+            # Allow only alphanumeric characters, hyphens, underscores, and spaces
+            import re
+            if not re.match(r'^[a-zA-Z0-9\s\-_]+$', service_name):
+                return "Error: service_name contains invalid characters. Only alphanumeric, spaces, hyphens, and underscores allowed."
+            
+            service_name = service_name.strip()
+            if len(service_name) > 100:  # Reasonable length limit
+                return "Error: service_name too long (max 100 characters)"
+        
+        # Require service_name for non-list actions
+        if action != "list" and not service_name:
+            return f"Error: service_name is required for '{action}' action"
+        
         if action == "list":
             result = subprocess.run(
                 ["powershell.exe", "-Command", "Get-Service | Select-Object Name, Status, StartType | Format-Table -AutoSize"],
@@ -5888,6 +6091,7 @@ async def firewall_status() -> str:
         return f"Error getting firewall status: {str(e)}"
 
 @mcp.tool()
+@windows_only
 async def firewall_rules_list(direction: str = "inbound") -> str:
     """List firewall rules"""
     try:
@@ -7137,44 +7341,44 @@ async def firewall_rules_list(direction: str = "inbound") -> str:
         if direction.lower() not in ["inbound", "outbound"]:
             direction = "inbound"
 
-        command = f"""
+        command = rf"""
         Write-Host '=== FIREWALL {direction.upper()} RULES ==='
 
-        \$rules = Get-NetFirewallRule -Direction {direction.title()} | Where-Object {{\$_.Enabled -eq 'True'}} | Select-Object -First 20
+        $rules = Get-NetFirewallRule -Direction {direction.title()} | Where-Object {{$_.Enabled -eq 'True'}} | Select-Object -First 20
 
-        foreach (\$rule in \$rules) {{
-            Write-Host "Rule: \$(\$rule.DisplayName)"
-            Write-Host "  Name: \$(\$rule.Name)"
-            Write-Host "  Enabled: \$(\$rule.Enabled)"
-            Write-Host "  Direction: \$(\$rule.Direction)"
-            Write-Host "  Action: \$(\$rule.Action)"
-            Write-Host "  Profile: \$(\$rule.Profile)"
-            Write-Host "  Program: \$(\$rule.Program)"
+        foreach ($rule in $rules) {{
+            Write-Host "Rule: $($rule.DisplayName)"
+            Write-Host "  Name: $($rule.Name)"
+            Write-Host "  Enabled: $($rule.Enabled)"
+            Write-Host "  Direction: $($rule.Direction)"
+            Write-Host "  Action: $($rule.Action)"
+            Write-Host "  Profile: $($rule.Profile)"
+            Write-Host "  Program: $($rule.Program)"
 
             # Get port information
             try {{
-                \$portFilter = \$rule | Get-NetFirewallPortFilter -ErrorAction SilentlyContinue
-                if (\$portFilter) {{
-                    Write-Host "  Protocol: \$(\$portFilter.Protocol)"
-                    Write-Host "  Local Port: \$(\$portFilter.LocalPort)"
-                    Write-Host "  Remote Port: \$(\$portFilter.RemotePort)"
+                $portFilter = $rule | Get-NetFirewallPortFilter -ErrorAction SilentlyContinue
+                if ($portFilter) {{
+                    Write-Host "  Protocol: $($portFilter.Protocol)"
+                    Write-Host "  Local Port: $($portFilter.LocalPort)"
+                    Write-Host "  Remote Port: $($portFilter.RemotePort)"
                 }}
             }} catch {{}}
 
             # Get address information
             try {{
-                \$addressFilter = \$rule | Get-NetFirewallAddressFilter -ErrorAction SilentlyContinue
-                if (\$addressFilter) {{
-                    Write-Host "  Local Address: \$(\$addressFilter.LocalAddress)"
-                    Write-Host "  Remote Address: \$(\$addressFilter.RemoteAddress)"
+                $addressFilter = $rule | Get-NetFirewallAddressFilter -ErrorAction SilentlyContinue
+                if ($addressFilter) {{
+                    Write-Host "  Local Address: $($addressFilter.LocalAddress)"
+                    Write-Host "  Remote Address: $($addressFilter.RemoteAddress)"
                 }}
             }} catch {{}}
 
             Write-Host '  ---'
         }}
 
-        \$totalRules = (Get-NetFirewallRule -Direction {direction.title()} | Where-Object {{\$_.Enabled -eq 'True'}}).Count
-        Write-Host "Total {direction} enabled rules: \$totalRules (showing first 20)"
+        $totalRules = (Get-NetFirewallRule -Direction {direction.title()} | Where-Object {{$_.Enabled -eq 'True'}}).Count
+        Write-Host "Total {direction} enabled rules: $totalRules (showing first 20)"
         """
 
         result = subprocess.run(
@@ -7898,4 +8102,14 @@ async def monitor_color_profile() -> str:
         return f"Error getting color profile information: {str(e)}"
 
 if __name__ == "__main__":
-    mcp.run()
+    try:
+        logger.info("Starting MCP Windows Automation Server...")
+        logger.info(f"Platform: {platform.system()} {platform.release()}")
+        logger.info(f"Python version: {platform.python_version()}")
+        logger.info(f"Server initialized with {len([name for name in dir() if name.startswith('mcp') and hasattr(globals()[name], 'tool')])} tools")
+        mcp.run()
+    except KeyboardInterrupt:
+        logger.info("Server shutdown requested by user")
+    except Exception as e:
+        logger.error(f"Server startup failed: {str(e)}")
+        raise

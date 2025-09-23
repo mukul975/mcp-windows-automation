@@ -1,0 +1,125 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-windows-automation"
+version = "1.0.0"
+description = "AI-powered Windows automation framework using Model Context Protocol (MCP)"
+authors = [
+    {name = "mukul975", email = "mukuljangra5@gmail.com"}
+]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Desktop Environment",
+]
+keywords = [
+    "mcp", "windows", "automation", "ai", "assistant", "control", 
+    "system", "desktop", "chatgpt", "claude", "protocol"
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "psutil>=5.9.0",
+    "pillow>=10.0.0",
+    "selenium>=4.15.0",
+    "webdriver-manager>=4.0.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+    "requests>=2.31.0",
+    "aiohttp>=3.8.0",
+    "jsonschema>=4.17.0",
+    "colorlog>=6.7.0",
+    "click>=8.1.0",
+    "scikit-learn>=1.3.0",
+    "pandas>=2.0.0",
+    "joblib>=1.3.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+]
+
+[project.optional-dependencies]
+windows = [
+    "pyautogui>=0.9.54; platform_system=='Windows'",
+    "pywin32>=306; platform_system=='Windows'",
+    "tkinter-tooltip>=2.0.0; platform_system=='Windows'",
+    "customtkinter>=5.2.0; platform_system=='Windows'",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mukul975/mcp-windows-automation"
+Repository = "https://github.com/mukul975/mcp-windows-automation"
+Issues = "https://github.com/mukul975/mcp-windows-automation/issues"
+Documentation = "https://github.com/mukul975/mcp-windows-automation/docs"
+
+[project.scripts]
+mcp-windows-server = "unified_server:main"
+
+[tool.setuptools]
+packages = ["mcp_windows_automation"]
+
+[tool.setuptools.package-dir]
+mcp_windows_automation = "."
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+    ".venv",
+    ".env"
+]
