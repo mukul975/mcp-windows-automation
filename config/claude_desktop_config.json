@@ -1,14 +1,17 @@
 {
   "mcpServers": {
-    "unified-server": {
+    "unified-windows-server": {
       "command": "python",
       "args": [
-        "Path to\\mcpwindows\\unified_server.py"
+        "D:\\MCP\\mcpwindows\\unified_server.py"
       ],
+      "cwd": "D:\\MCP\\mcpwindows",
       "env": {
-        "MYSQL_USER": "MYSQL_USER",
-        "MYSQL_PASSWORD": "MYSQL_PASSWORD",
-        "MYSQL_DATABASE": "MYSQL_DATABASE_NAME",  
+        "PYTHONPATH": "D:\\MCP\\mcpwindows",
+        "PYTHONUNBUFFERED": "1",
+        "MYSQL_USER": "your_mysql_username",
+        "MYSQL_PASSWORD": "your_mysql_password",
+        "MYSQL_DATABASE": "your_database_name",
         "MYSQL_PORT": "3306",
         "MYSQL_HOST": "localhost"
       }
