@@ -1,152 +1,198 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="author" content="mukul975" />
-  <meta name="description" content="MCP Windows Automation Server - AI-powered, assistant-controlled automation framework for Windows 10/11 using Model Context Protocol (MCP)." />
-  <meta name="keywords" content="AI automation, Windows automation, MCP protocol, ChatGPT assistant, Claude integration, LocalAI tools, OS control, Python automation, system assistant" />
- 
-</head>
-<body>
+# 🚀 MCP Windows Server - AI-Powered Windows Automation
 
-<h1>🚀 MCP Windows Automation Server - AI-Powered Windows Control Suite</h1>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Platform: Windows](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/windows)
+[![PyPI version](https://badge.fury.io/py/mcp-windows-server.svg)](https://badge.fury.io/py/mcp-windows-server)
+[![AI Ready](https://img.shields.io/badge/AI-Assistant%20Ready-brightgreen.svg)](https://github.com/Mahipal/mcp-windows-server)
 
-<div class="badge">
-  <img src="https://img.shields.io/github/license/mukul975/mcp-windows-automation" alt="License" />
-  <img src="https://img.shields.io/badge/Python-3.10%2B-blue" alt="Python Version" />
-  <img src="https://img.shields.io/badge/Platform-Windows%2010%2F11-lightgrey" alt="Platform" />
-  <img src="https://img.shields.io/badge/AI-Assistant%20Ready-brightgreen" alt="AI Ready" />
-</div>
+> **Transform your Windows PC into an intelligent automation hub controlled by AI assistants like Claude, ChatGPT, and more.**
 
-<blockquote>
-  <strong>Transform your Windows PC into an intelligent automation hub controlled by AI assistants.</strong>
-</blockquote>
+## 🔍 Overview
 
-<hr/>
+**MCP Windows Server** is an AI-native automation framework that enables AI assistants to control Windows systems through natural language commands. Built on the **Model Context Protocol (MCP)**, it provides secure, comprehensive system-level automation capabilities.
 
-<h2>🔍 Overview</h2>
-<p>
-  <strong>MCP Windows Automation Server</strong> is an AI-native automation framework that allows AI assistants like ChatGPT, Claude, LocalAI, and others to automate over 200 Windows tasks through natural language commands. It uses <strong>Model Context Protocol (MCP)</strong> to provide deep system-level control securely.
-</p>
+### 🤖 What is Model Context Protocol (MCP)?
 
-<h2>🤖 What is Model Context Protocol (MCP)?</h2>
-<p>
-  MCP is an open protocol by Anthropic that allows AI models to interact safely with local tools, APIs, and OS services. The MCP Server implements this for Windows, making AI assistants powerful desktop controllers.
-</p>
+MCP is an open protocol by Anthropic that allows AI models to interact safely with local tools, APIs, and system services. Our server implements this protocol for Windows, making AI assistants powerful desktop automation agents.
 
-<ul>
-  <li>🔐 Secure OS Command Access</li>
-  <li>🧠 AI Agent Compatibility</li>
-  <li>🔄 Real-Time Communication</li>
-  <li>🔧 Plugin-Ready Framework</li>
-</ul>
+- 🔐 **Secure System Access** - Controlled command execution with safety filters
+- 🧠 **AI Agent Compatible** - Works with Claude, ChatGPT, and other AI assistants  
+- 🔄 **Real-Time Communication** - Instant bidirectional AI ↔️ System interaction
+- 🔧 **Plugin Architecture** - Extensible framework for custom automation
 
-<hr/>
+## 🚀 Quick Start
 
-<h2>🌟 Key Features</h2>
-<ul>
-  <li>✅ 209+ Tools for Automation</li>
-  <li>🧠 AI-Context Awareness</li>
-  <li>🔁 Bi-directional AI ↔️ System</li>
-  <li>⚙️ Sandbox Execution Mode</li>
-  <li>🧱 Modular Plugin Design</li>
-  <li>🧪 ML Engine for Prediction</li>
-</ul>
+### Installation
 
-<h2>🧭 Tool Categories</h2>
-<ul>
-  <li><strong>🖥️ System Control:</strong> Processes, registry, services</li>
-  <li><strong>🧰 UI Automation:</strong> Mouse/keyboard emulation, OCR</li>
-  <li><strong>🎵 Media:</strong> Spotify, YouTube, VLC automation</li>
-  <li><strong>🌍 Web Automation:</strong> Chrome DevTools, form automation</li>
-  <li><strong>📂 File System:</strong> Sync, backups, file watchers</li>
-  <li><strong>📑 Office:</strong> Excel, Word, PowerPoint, Outlook</li>
-  <li><strong>🖼️ Vision:</strong> OCR, screenshot utilities</li>
-  <li><strong>🌐 Networking:</strong> WiFi, DNS, firewall, hotspot tools</li>
-</ul>
+```bash
+# Install from PyPI
+pip install mcp-windows-server
 
-<h2>🧠 AI/ML Prediction Engine</h2>
-<p>
-  The ML engine observes system usage and user behavior, training predictive models for:
-</p>
-<ul>
-  <li>🔮 Action Prediction</li>
-  <li>📊 Resource Forecasting</li>
-  <li>🎯 Workflow Optimization</li>
-  <li>🛠️ Performance Tuning</li>
-</ul>
+# Or install from source
+git clone https://github.com/Mahipal/mcp-windows-server.git
+cd mcp-windows-server
+pip install -r requirements.txt
+```
 
-<h2>⚡ Use Cases</h2>
-<ul>
-  <li>📈 Automate business reports, emails, monitoring</li>
-  <li>🎧 Create playlists, record media actions</li>
-  <li>💻 Developer setup automation</li>
-  <li>🔧 Admin tasks like SFC, event logs, service checks</li>
-</ul>
+### Usage
 
-<h2>🚀 Installation</h2>
-<pre><code>git clone https://github.com/mukul975/mcp-windows-automation.git
-cd mcp-windows-automation
-pip install -r requirements.txt</code></pre>
+```bash
+# Start the MCP server
+mcp-windows-server
 
-<h2>▶️ Start Server</h2>
-<pre><code>python src/unified_server.py</code></pre>
+# Or use the unified server directly
+unified-server
+```
 
-<h2>🌐 Web Automation</h2>
-<ol>
-  <li>Download <a href="https://chromedriver.chromium.org/" target="_blank">ChromeDriver</a></li>
-  <li>Add to PATH or project root</li>
-</ol>
+### Claude Desktop Integration
 
-<h2>🧠 ML Monitoring</h2>
-<pre><code>python -c "from src.unified_server import start_ml_monitoring; start_ml_monitoring()"</code></pre>
+1. Install the package: `pip install mcp-windows-server`
+2. Configure Claude Desktop:
 
-<h2>🧪 Sample Tool Calls</h2>
-<pre><code>{
-  "tool": "spotify_play_favorite_song"
-}
-
+```json
 {
-  "tool": "take_screenshot",
-  "parameters": { "filename": "screen.png" }
-}</code></pre>
+  "mcpServers": {
+    "mcp-windows-server": {
+      "command": "mcp-windows-server",
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  }
+}
+```
 
-<h2>📁 Project Structure</h2>
-<pre><code>├── src/
-│   ├── unified_server.py
-│   ├── advanced_automation_server.py
-│   ├── mcp_gui.py
-├── config/
-├── docs/
-├── examples/
-├── tests/
-└── README.md</code></pre>
+3. Restart Claude Desktop and start automating!
 
-<h2>🧪 Testing</h2>
-<pre><code>python -m pytest tests/</code></pre>
+## 🌟 Key Features
 
-<h2>🤝 Contributing</h2>
-<ol>
-  <li>Fork and clone</li>
-  <li>Create feature branch</li>
-  <li>Add tests</li>
-  <li>Run tests</li>
-  <li>Submit PR</li>
-</ol>
+- ✅ **200+ Automation Tools** - Comprehensive Windows control
+- 🧠 **AI-Context Aware** - Understands natural language commands
+- 🔁 **Bidirectional Communication** - Real-time AI ↔️ System interaction
+- ⚙️ **Safe Execution** - Built-in command filtering and validation
+- 🧱 **Modular Design** - Plugin-based architecture
+- 🧪 **ML Integration** - Machine learning for predictive automation
 
-<h2>📜 License</h2>
-<p>
-  MIT License — See <code>LICENSE</code> file
-</p>
+## 🧭 Automation Categories
 
-<h2>📬 Contact</h2>
-<p>Email: <a href="mailto:mukuljangra5@gmail.com">mukuljangra5@gmail.com</a></p>
-<p>GitHub: <a href="https://github.com/mukul975" target="_blank">mukul975</a></p>
+| Category | Description | Examples |
+|----------|-------------|----------|
+| 🖥️ **System Control** | Process, registry, services management | Kill processes, manage services, registry edits |
+| 📁 **File Operations** | File system automation | Copy, move, search, backup files |
+| 🌐 **Web Automation** | Browser control and web scraping | Form filling, data extraction, navigation |
+| 🖼️ **Image Processing** | Screenshot and image manipulation | OCR, image editing, screen capture |
+| 📊 **Data Analysis** | ML training and data processing | Model training, data visualization |
+| 🏢 **Office Integration** | Microsoft Office automation | Excel reports, Word documents, PowerPoint |
+| 🔒 **Security** | System security and monitoring | Firewall rules, security scans, monitoring |
+| 🌐 **Network** | Network configuration and monitoring | WiFi management, network diagnostics |
 
-<blockquote>
-  “Automate Everything. With AI.” 🧠💻
-</blockquote>
+## 🛠️ Example Commands
 
-</body>
-</html>
+Once integrated with Claude Desktop, you can use natural language:
+
+```
+"Take a screenshot and save it as desktop.png"
+"Get my system information"
+"List all running processes"
+"Create a backup of my Documents folder"
+"Check my network connection status"
+"Open Calculator application"
+```
+
+## 📁 Project Structure
+
+```
+mcp-windows-server/
+├── mcp_windows_automation/     # Main package
+│   └── __init__.py
+├── unified_server.py           # Core MCP server
+├── office_mcp_server.py        # Office integration
+├── config/                     # Configuration templates
+├── docs/                       # Documentation
+├── examples/                   # Usage examples
+├── requirements.txt            # Dependencies
+└── README.md                   # This file
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+```bash
+# Optional MySQL database integration
+MYSQL_USER=your_username
+MYSQL_PASSWORD=your_password
+MYSQL_DATABASE=your_database
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+
+# Python configuration
+PYTHONPATH=/path/to/mcp-windows-server
+PYTHONUNBUFFERED=1
+```
+
+### Advanced Configuration
+
+For advanced setups, copy the configuration template:
+
+```bash
+cp config/claude_desktop_config.template.json config/claude_desktop_config.json
+# Edit with your specific paths and credentials
+```
+
+## 🧪 Development
+
+### Running from Source
+
+```bash
+git clone https://github.com/Mahipal/mcp-windows-server.git
+cd mcp-windows-server
+pip install -r requirements.txt
+python unified_server.py
+```
+
+### Building Package
+
+```bash
+python -m build
+pip install dist/mcp_windows_server-*.whl
+```
+
+## 🔒 Security
+
+- **Command Filtering**: Dangerous commands are blocked by default
+- **Safe Execution**: All operations run in controlled environment
+- **No Credential Storage**: Sensitive data excluded from package
+- **Template-Based Config**: Only safe configuration templates included
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📬 Contact
+
+- **Author**: Mahipal
+- **Email**: mukuljangra5@gmail.com
+- **GitHub**: [Mahipal](https://github.com/Mahipal)
+- **PyPI**: [mcp-windows-server](https://pypi.org/project/mcp-windows-server/)
+
+## 🙏 Acknowledgments
+
+- [Anthropic](https://www.anthropic.com/) for the Model Context Protocol
+- [Claude](https://claude.ai/) for AI assistant integration
+- The open-source community for inspiration and contributions
+
+---
+
+> **"Automate Everything. With AI."** 🧠💻
+
+*Made with ❤️ for the AI automation community*

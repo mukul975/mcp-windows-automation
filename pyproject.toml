@@ -3,19 +3,18 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mcp-windows-automation"
-version = "1.0.0"
+name = "mcp-windows-server"
+version = "1.0.1"
 description = "AI-powered Windows automation framework using Model Context Protocol (MCP)"
 authors = [
-    {name = "mukul975", email = "mukuljangra5@gmail.com"}
+    {name = "Mahipal", email = "mukuljangra5@gmail.com"}
 ]
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
 requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -65,19 +64,21 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mukul975/mcp-windows-automation"
-Repository = "https://github.com/mukul975/mcp-windows-automation"
-Issues = "https://github.com/mukul975/mcp-windows-automation/issues"
-Documentation = "https://github.com/mukul975/mcp-windows-automation/docs"
+Homepage = "https://github.com/mukul975/mcp-windows-server"
+Repository = "https://github.com/mukul975/mcp-windows-server"
+Issues = "https://github.com/mukul975/mcp-windows-server/issues"
+Documentation = "https://github.com/mukul975/mcp-windows-server/docs"
 
 [project.scripts]
-mcp-windows-server = "unified_server:main"
+mcp-windows-server = "mcp_windows_automation:main"
+unified-server = "unified_server:main"
 
 [tool.setuptools]
 packages = ["mcp_windows_automation"]
+py-modules = ["unified_server", "office_mcp_server"]
 
 [tool.setuptools.package-dir]
-mcp_windows_automation = "."
+"" = "."
 
 [tool.black]
 line-length = 88

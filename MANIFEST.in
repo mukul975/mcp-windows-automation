@@ -1,0 +1,48 @@
+# Include documentation
+include README.md
+include LICENSE
+include SECURITY.md
+include IMPROVEMENT_PLAN.md
+
+# Include configuration templates
+include config/claude_desktop_config.template.json
+include config/README.md
+
+# Include documentation
+recursive-include docs *.md
+
+# Include examples
+recursive-include examples *.bat *.py *.json
+
+# Include requirements
+include requirements.txt
+
+# Include project configuration
+include pyproject.toml
+
+# Exclude sensitive files
+exclude config/claude_desktop_config.json
+exclude config/claude_desktop_config_alternative.json
+exclude config/*_config.json
+
+# Exclude development and build artifacts
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .DS_Store
+global-exclude *.egg-info
+recursive-exclude * __pycache__
+recursive-exclude * *.py[cod]
+
+# Exclude Chrome profile data
+recursive-exclude chrome_profile *
+
+# Exclude logs and temporary files
+global-exclude *.log
+global-exclude *.tmp
+global-exclude *.temp
+
+# Exclude git and IDE files
+recursive-exclude .git *
+recursive-exclude .vscode *
+recursive-exclude .idea *

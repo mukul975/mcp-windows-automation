@@ -3,11 +3,11 @@
     "unified-windows-server": {
       "command": "python",
       "args": [
-        "D:\\MCP\\mcpwindows\\unified_server.py"
+        "/path/to/your/mcp/project/unified_server.py"
       ],
-      "cwd": "D:\\MCP\\mcpwindows",
+      "cwd": "/path/to/your/mcp/project",
       "env": {
-        "PYTHONPATH": "D:\\MCP\\mcpwindows",
+        "PYTHONPATH": "/path/to/your/mcp/project",
         "PYTHONUNBUFFERED": "1",
         "MYSQL_USER": "your_mysql_username",
         "MYSQL_PASSWORD": "your_mysql_password",
