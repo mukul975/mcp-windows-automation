@@ -212,3 +212,184 @@ training_data.csv
 
 # Config files with sensitive data
 config/claude_desktop_config_alternative.json
+
+# =============================================================================
+# PROJECT-SPECIFIC IGNORES
+# =============================================================================
+
+# Chrome Profile Data (contains sensitive user data)
+chrome_profile/Default/
+chrome_profile/*/
+!chrome_profile/.gitkeep
+
+# Browser automation artifacts
+*.crdownload
+selenium-debug.log
+geckodriver.log
+
+# Machine Learning and Training Data
+ml_auto_training_config.json
+ml_monitoring_setup.flag
+*.model
+*.joblib
+training_logs/
+model_checkpoints/
+training_data/
+ml_cache/
+
+# Automation and Monitoring Outputs
+automation_logs/
+monitoring_data/
+performance_data/
+system_snapshots/
+automation_screenshots/
+
+# Windows System Files and Artifacts
+*.lnk
+*.temp
+.DS_Store
+
+# Office Integration Temporary Files
+~$*.docx
+~$*.xlsx
+~$*.pptx
+
+# Security and Monitoring Data
+security_logs/
+audit_trails/
+access_logs/
+security_reports/
+
+# User Activity and Analytics
+user_activity_logs/
+analytics_data/
+usage_statistics/
+
+# Backup Files
+*.bak
+*.backup
+*.old
+*_backup.*
+*_old.*
+
+# Process and System Dumps
+*.dmp
+*.dump
+core.*
+
+# Network and Connection Logs
+network_logs/
+connection_data/
+proxy_logs/
+
+# Automation Test Results
+test_results/
+automation_reports/
+test_screenshots/
+test_videos/
+
+# Configuration Overrides (keep templates, ignore actual configs)
+config/local_*
+config/dev_*
+config/prod_*
+config/staging_*
+*_local.json
+*_dev.json
+*_prod.json
+
+# Runtime Data
+runtime_data/
+session_data/
+cache_data/
+temp_data/
+
+# Windows Event Logs
+*.evtx
+*.etl
+
+# PowerShell Transcripts
+PowerShell_transcript.*
+
+# Credential and Certificate Files
+*.p12
+*.pfx
+*.cer
+*.crt
+*.pem
+credentials/
+certificates/
+
+# Application Data
+AppData/
+LocalAppData/
+application_data/
+
+# Temporary Internet Files
+Temporary Internet Files/
+INetCache/
+
+# Windows Search Index
+Windows.edb
+
+# System Volume Information
+System Volume Information/
+
+# Windows shortcuts
+*.url
+
+# Thumbnail cache files
+Thumbs.db:encryptable
+ehthumbs_vista.db
+
+# Windows Installer files from build outputs
+*.cab
+*.msix
+
+# JetBrains IDEs (additional patterns)
+*.iws
+*.iml
+*.ipr
+
+# Visual Studio Code (additional patterns)
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+.ionide/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Emacs
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Node.js (if any JavaScript components)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# =============================================================================
+# END PROJECT-SPECIFIC IGNORES
+# =============================================================================
