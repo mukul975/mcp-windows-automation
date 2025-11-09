@@ -30,7 +30,7 @@ MCP is an open protocol by Anthropic that allows AI models to interact safely wi
 pip install mcp-windows-server
 
 # Or install from source
-git clone https://github.com/Mahipal/mcp-windows-server.git
+git clone https://github.com/mukul975/mcp-windows-automation.git
 cd mcp-windows-server
 pip install -r requirements.txt
 ```
