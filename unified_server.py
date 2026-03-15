@@ -10,6 +10,7 @@ Allows LLMs to query databases, inspect schemas, and execute SQL commands.
 """
 
 import asyncio
+import functools
 import json
 import logging
 import re
@@ -177,7 +178,7 @@ async def database_lifespan(server: FastMCP) -> AsyncIterator[Dict[str, Any]]:
 mcp = FastMCP("MySQL MCP Server", lifespan=database_lifespan)
 
 @mcp.tool()
-def mysql_fragmentation_extensive_analysis(ctx: Context, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_fragmentation_extensive_analysis(ctx: Context, database_name: Optional[str] = None):
     """Provide a detailed analysis and defragmentation recommendations for tables."""
     try:
         db = ctx.lifespan["db"]
@@ -238,7 +239,7 @@ def mysql_fragmentation_extensive_analysis(ctx: Context, database_name: Optional
 
 
 @mcp.tool()
-def mysql_index_optimization_suggestions(ctx: Context) -> Dict[str, Any]:
+def mysql_index_optimization_suggestions(ctx: Context):
     """Suggest optimal indexing strategies and potential consolidations."""
     try:
         db = ctx.lifespan["db"]
@@ -279,7 +280,7 @@ def mysql_index_optimization_suggestions(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_historical_slow_query_analysis(ctx: Context, min_duration: Optional[float] = None) -> Dict[str, Any]:
+def mysql_historical_slow_query_analysis(ctx: Context, min_duration: Optional[float] = None):
     """Analyze and aggregate historical slow query patterns."""
     try:
         db = ctx.lifespan["db"]
@@ -309,7 +310,7 @@ def mysql_historical_slow_query_analysis(ctx: Context, min_duration: Optional[fl
 
 
 @mcp.tool()
-def mysql_buffer_pool_cache_diagnostics(ctx: Context) -> Dict[str, Any]:
+def mysql_buffer_pool_cache_diagnostics(ctx: Context):
     """Detailed diagnostics for buffer pool and cache tuning."""
     try:
         db = ctx.lifespan["db"]
@@ -341,7 +342,7 @@ def mysql_buffer_pool_cache_diagnostics(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_advanced_deadlock_detection(ctx: Context) -> Dict[str, Any]:
+def mysql_advanced_deadlock_detection(ctx: Context):
     """Enhanced detection and reporting of deadlock issues."""
     try:
         db = ctx.lifespan["db"]
@@ -369,7 +370,7 @@ def mysql_advanced_deadlock_detection(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_cross_database_fk_analysis(ctx: Context) -> Dict[str, Any]:
+def mysql_cross_database_fk_analysis(ctx: Context):
     """Analyze foreign key issues across databases."""
     try:
         db = ctx.lifespan["db"]
@@ -390,7 +391,7 @@ def mysql_cross_database_fk_analysis(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_statistical_anomaly_detection(ctx: Context) -> Dict[str, Any]:
+def mysql_statistical_anomaly_detection(ctx: Context):
     """Detect statistical anomalies in column distributions."""
     try:
         db = ctx.lifespan["db"]
@@ -411,7 +412,7 @@ def mysql_statistical_anomaly_detection(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_audit_log_summary(ctx: Context) -> Dict[str, Any]:
+def mysql_audit_log_summary(ctx: Context):
     """Summarize and detect anomalies within audit logs."""
     try:
         db = ctx.lifespan["db"]
@@ -432,7 +433,7 @@ def mysql_audit_log_summary(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_replication_lag_monitoring(ctx: Context) -> Dict[str, Any]:
+def mysql_replication_lag_monitoring(ctx: Context):
     """Monitor replication lag over a time series."""
     try:
         db = ctx.lifespan["db"]
@@ -456,7 +457,7 @@ def mysql_replication_lag_monitoring(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_privileges_security_audit(ctx: Context) -> Dict[str, Any]:
+def mysql_privileges_security_audit(ctx: Context):
     """Audit user privileges and recommend policy improvements."""
     try:
         db = ctx.lifespan["db"]
@@ -477,7 +478,7 @@ def mysql_privileges_security_audit(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_real_time_query_perf_metrics(ctx: Context) -> Dict[str, Any]:
+def mysql_real_time_query_perf_metrics(ctx: Context):
     """Provide real-time metrics on query performance and bottlenecks."""
     try:
         db = ctx.lifespan["db"]
@@ -498,7 +499,7 @@ def mysql_real_time_query_perf_metrics(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_adaptive_index_improvements(ctx: Context) -> Dict[str, Any]:
+def mysql_adaptive_index_improvements(ctx: Context):
     """Suggest adaptive index improvements based on query patterns."""
     try:
         db = ctx.lifespan["db"]
@@ -519,7 +520,7 @@ def mysql_adaptive_index_improvements(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_server_health_dashboard(ctx: Context) -> Dict[str, Any]:
+def mysql_server_health_dashboard(ctx: Context):
     """Create a dashboard displaying server health metrics."""
     try:
         db = ctx.lifespan["db"]
@@ -540,7 +541,7 @@ def mysql_server_health_dashboard(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_backup_health_check(ctx: Context) -> Dict[str, Any]:
+def mysql_backup_health_check(ctx: Context):
     """Perform a health check of backup strategies and configurations."""
     try:
         db = ctx.lifespan["db"]
@@ -559,7 +560,7 @@ def mysql_backup_health_check(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_partition_management_recommendations(ctx: Context) -> Dict[str, Any]:
+def mysql_partition_management_recommendations(ctx: Context):
     """Recommend partition management techniques."""
     try:
         db = ctx.lifespan["db"]
@@ -588,7 +589,7 @@ def mysql_partition_management_recommendations(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_dynamic_configuration_tuning(ctx: Context) -> Dict[str, Any]:
+def mysql_dynamic_configuration_tuning(ctx: Context):
     """Analyze and suggest dynamic configuration changes."""
     try:
         db = ctx.lifespan["db"]
@@ -617,7 +618,7 @@ def mysql_dynamic_configuration_tuning(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_innodb_metrics_analysis(ctx: Context) -> Dict[str, Any]:
+def mysql_innodb_metrics_analysis(ctx: Context):
     """Deep analysis of InnoDB metrics for performance tuning."""
     try:
         db = ctx.lifespan["db"]
@@ -637,7 +638,7 @@ def mysql_innodb_metrics_analysis(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_multi_tenancy_performance_insights(ctx: Context) -> Dict[str, Any]:
+def mysql_multi_tenancy_performance_insights(ctx: Context):
     """Insights and recommendations for multi-tenant databases."""
     try:
         db = ctx.lifespan["db"]
@@ -666,7 +667,7 @@ def mysql_multi_tenancy_performance_insights(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_ssl_tls_configuration_audit(ctx: Context) -> Dict[str, Any]:
+def mysql_ssl_tls_configuration_audit(ctx: Context):
     """Audit and improve SSL/TLS security configurations."""
     try:
         db = ctx.lifespan["db"]
@@ -694,7 +695,7 @@ def mysql_ssl_tls_configuration_audit(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_auto_index_rebuild_scheduler(ctx: Context) -> Dict[str, Any]:
+def mysql_auto_index_rebuild_scheduler(ctx: Context):
     """Automatically schedule index rebuilds based on usage patterns."""
     try:
         db = ctx.lifespan["db"]
@@ -721,7 +722,7 @@ def mysql_auto_index_rebuild_scheduler(ctx: Context) -> Dict[str, Any]:
             "error_type": type(e).__name__
         }
 @mcp.tool()
-async def mysql_user_statistics(ctx: Context) -> Dict[str, Any]:
+async def mysql_user_statistics(ctx: Context):
     """Show detailed user statistics like query counts and connection duration."""
     try:
         db = ctx.lifespan["db"]
@@ -736,7 +737,7 @@ async def mysql_user_statistics(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_list_open_transactions(ctx: Context) -> Dict[str, Any]:
+async def mysql_list_open_transactions(ctx: Context):
     """List current open transactions and their states."""
     try:
         db = ctx.lifespan["db"]
@@ -751,7 +752,7 @@ async def mysql_list_open_transactions(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_lock_wait_status(ctx: Context) -> Dict[str, Any]:
+async def mysql_lock_wait_status(ctx: Context):
     """Display status of locks and waits in the database."""
     try:
         db = ctx.lifespan["db"]
@@ -765,7 +766,7 @@ async def mysql_lock_wait_status(ctx: Context) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 @mcp.tool()
-async def mysql_fragmentation_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_fragmentation_analysis(ctx: Context):
     """Show table and index fragmentation analysis."""
     try:
         db = ctx.lifespan["db"]
@@ -780,7 +781,7 @@ async def mysql_fragmentation_analysis(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_index_usage_statistics(ctx: Context) -> Dict[str, Any]:
+async def mysql_index_usage_statistics(ctx: Context):
     """Provide index usage statistics and suggestions for optimization."""
     try:
         db = ctx.lifespan["db"]
@@ -794,7 +795,7 @@ async def mysql_index_usage_statistics(ctx: Context) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 @mcp.tool()
-async def mysql_slow_query_analysis(ctx: Context, limit: int = 10) -> Dict[str, Any]:
+async def mysql_slow_query_analysis(ctx: Context, limit: int = 10):
     """Analyze queries from the slow query log with summaries."""
     try:
         db = ctx.lifespan["db"]
@@ -809,7 +810,7 @@ async def mysql_slow_query_analysis(ctx: Context, limit: int = 10) -> Dict[str, 
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_stored_functions_procedures(ctx: Context) -> Dict[str, Any]:
+async def mysql_stored_functions_procedures(ctx: Context):
     """List all stored functions and procedures with metadata details."""
     try:
         db = ctx.lifespan["db"]
@@ -823,7 +824,7 @@ async def mysql_stored_functions_procedures(ctx: Context) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 @mcp.tool()
-async def mysql_audit_logs(ctx: Context) -> Dict[str, Any]:
+async def mysql_audit_logs(ctx: Context):
     """Show audit logs if enabled or recent security events."""
     try:
         db = ctx.lifespan["db"]
@@ -838,7 +839,7 @@ async def mysql_audit_logs(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_running_events(ctx: Context) -> Dict[str, Any]:
+async def mysql_running_events(ctx: Context):
     """List all currently running events with schedules and status."""
     try:
         db = ctx.lifespan["db"]
@@ -852,7 +853,7 @@ async def mysql_running_events(ctx: Context) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 @mcp.tool()
-async def mysql_triggers_by_event(ctx: Context) -> Dict[str, Any]:
+async def mysql_triggers_by_event(ctx: Context):
     """Show triggers grouped by event type or action."""
     try:
         db = ctx.lifespan["db"]
@@ -867,7 +868,7 @@ async def mysql_triggers_by_event(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_connection_monitor(ctx: Context) -> Dict[str, Any]:
+async def mysql_connection_monitor(ctx: Context):
     """Provide live monitoring of connections and resource usage."""
     try:
         db = ctx.lifespan["db"]
@@ -881,7 +882,7 @@ async def mysql_connection_monitor(ctx: Context) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 @mcp.tool()
-async def mysql_stored_views_info(ctx: Context) -> Dict[str, Any]:
+async def mysql_stored_views_info(ctx: Context):
     """Display information about stored views in the database."""
     try:
         db = ctx.lifespan["db"]
@@ -896,7 +897,7 @@ async def mysql_stored_views_info(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_roles_and_privileges(ctx: Context) -> Dict[str, Any]:
+async def mysql_roles_and_privileges(ctx: Context):
     """List database roles and their privileges."""
     try:
         db = ctx.lifespan["db"]
@@ -910,7 +911,7 @@ async def mysql_roles_and_privileges(ctx: Context) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 @mcp.tool()
-async def mysql_grants_for_entities(ctx: Context) -> Dict[str, Any]:
+async def mysql_grants_for_entities(ctx: Context):
     """Show grants assigned to roles and users."""
     try:
         db = ctx.lifespan["db"]
@@ -925,7 +926,7 @@ async def mysql_grants_for_entities(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_unused_duplicate_indexes(ctx: Context) -> Dict[str, Any]:
+async def mysql_unused_duplicate_indexes(ctx: Context):
     """Identify unused or duplicate indexes that could be dropped."""
     try:
         db = ctx.lifespan["db"]
@@ -939,7 +940,7 @@ async def mysql_unused_duplicate_indexes(ctx: Context) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 @mcp.tool()
-async def mysql_tables_without_primary_keys(ctx: Context) -> Dict[str, Any]:
+async def mysql_tables_without_primary_keys(ctx: Context):
     """List tables without primary keys and recommendations."""
     try:
         db = ctx.lifespan["db"]
@@ -954,7 +955,7 @@ async def mysql_tables_without_primary_keys(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_table_statistics(ctx: Context) -> Dict[str, Any]:
+async def mysql_table_statistics(ctx: Context):
     """Provide info about table statistics like row counts and sizes."""
     try:
         db = ctx.lifespan["db"]
@@ -968,7 +969,7 @@ async def mysql_table_statistics(ctx: Context) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 @mcp.tool()
-async def mysql_replication_binary_log_status(ctx: Context) -> Dict[str, Any]:
+async def mysql_replication_binary_log_status(ctx: Context):
     """Show replication and binary log status details."""
     try:
         db = ctx.lifespan["db"]
@@ -983,7 +984,7 @@ async def mysql_replication_binary_log_status(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_buffer_pool_statistics(ctx: Context) -> Dict[str, Any]:
+async def mysql_buffer_pool_statistics(ctx: Context):
     """Display buffer pool and cache usage statistics."""
     try:
         db = ctx.lifespan["db"]
@@ -998,7 +999,7 @@ async def mysql_buffer_pool_statistics(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_diagnostics_summary(ctx: Context) -> Dict[str, Any]:
+async def mysql_diagnostics_summary(ctx: Context):
     """Provide detailed diagnostics combining multiple status metrics."""
     try:
         db = ctx.lifespan["db"]
@@ -1018,7 +1019,7 @@ async def mysql_diagnostics_summary(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_query(query: str, ctx: Context, params: Optional[List] = None) -> Dict[str, Any]:
+def mysql_query(query: str, ctx: Context, params: Optional[List] = None):
     """Execute read-only MySQL queries.
 
     Args:
@@ -1051,7 +1052,7 @@ def mysql_query(query: str, ctx: Context, params: Optional[List] = None) -> Dict
 
 
 @mcp.tool()
-def list_mysql_tables(ctx: Context) -> Dict[str, Any]:
+def list_mysql_tables(ctx: Context):
     """List all tables in the current MySQL database.
 
     Returns:
@@ -1075,7 +1076,7 @@ def list_mysql_tables(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_table_schema(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_table_schema(table_name: str, ctx: Context):
     """Get detailed schema information for a MySQL table.
 
     Args:
@@ -1102,7 +1103,7 @@ def mysql_table_schema(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_table_data(table_name: str, ctx: Context, limit: int = 10) -> Dict[str, Any]:
+def mysql_table_data(table_name: str, ctx: Context, limit: int = 10):
     """Fetch sample data from a MySQL table.
 
     Args:
@@ -1132,7 +1133,7 @@ def mysql_table_data(table_name: str, ctx: Context, limit: int = 10) -> Dict[str
 
 
 @mcp.tool()
-def mysql_databases(ctx: Context) -> Dict[str, Any]:
+def mysql_databases(ctx: Context):
     """List all databases accessible to the current user.
 
     Returns:
@@ -1156,7 +1157,7 @@ def mysql_databases(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_table_indexes(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_table_indexes(table_name: str, ctx: Context):
     """Show all indexes for a specific table.
 
     Args:
@@ -1185,7 +1186,7 @@ def mysql_table_indexes(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_table_size(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_table_size(table_name: str, ctx: Context):
     """Get storage size information for a table.
 
     Args:
@@ -1222,7 +1223,7 @@ def mysql_table_size(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_user_privileges(ctx: Context) -> Dict[str, Any]:
+def mysql_user_privileges(ctx: Context):
     """Show current user's privileges.
 
     Returns:
@@ -1246,7 +1247,7 @@ def mysql_user_privileges(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_process_list(ctx: Context) -> Dict[str, Any]:
+def mysql_process_list(ctx: Context):
     """Show active MySQL connections and processes.
 
     Returns:
@@ -1271,7 +1272,7 @@ def mysql_process_list(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_table_status(ctx: Context, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_table_status(ctx: Context, database_name: Optional[str] = None):
     """Get comprehensive status information for tables.
 
     Args:
@@ -1303,7 +1304,7 @@ def mysql_table_status(ctx: Context, database_name: Optional[str] = None) -> Dic
 
 
 @mcp.tool()
-def mysql_variables(ctx: Context, pattern: Optional[str] = None) -> Dict[str, Any]:
+def mysql_variables(ctx: Context, pattern: Optional[str] = None):
     """Show MySQL system variables.
 
     Args:
@@ -1335,7 +1336,7 @@ def mysql_variables(ctx: Context, pattern: Optional[str] = None) -> Dict[str, An
 
 
 @mcp.tool()
-def mysql_charset_collation(ctx: Context) -> Dict[str, Any]:
+def mysql_charset_collation(ctx: Context):
     """Show available character sets and collations.
 
     Returns:
@@ -1362,7 +1363,7 @@ def mysql_charset_collation(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_table_constraints(table_name: str, ctx: Context, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_table_constraints(table_name: str, ctx: Context, database_name: Optional[str] = None):
     """Show foreign key and check constraints for a table.
 
     Args:
@@ -1401,7 +1402,7 @@ def mysql_table_constraints(table_name: str, ctx: Context, database_name: Option
 
 
 @mcp.tool()
-def mysql_column_stats(table_name: str, ctx: Context, column_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_column_stats(table_name: str, ctx: Context, column_name: Optional[str] = None):
     """Get column statistics and data distribution.
 
     Args:
@@ -1440,7 +1441,7 @@ def mysql_column_stats(table_name: str, ctx: Context, column_name: Optional[str]
 
 
 @mcp.tool()
-def mysql_explain_query(query: str, ctx: Context) -> Dict[str, Any]:
+def mysql_explain_query(query: str, ctx: Context):
     """Analyze query execution plan.
 
     Args:
@@ -1471,7 +1472,7 @@ def mysql_explain_query(query: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_search_tables(column_pattern: str, ctx: Context, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_search_tables(column_pattern: str, ctx: Context, database_name: Optional[str] = None):
     """Search for tables containing specific column names.
 
     Args:
@@ -1509,7 +1510,7 @@ def mysql_search_tables(column_pattern: str, ctx: Context, database_name: Option
 
 
 @mcp.tool()
-def mysql_backup_info(ctx: Context) -> Dict[str, Any]:
+def mysql_backup_info(ctx: Context):
     """Get information about database backup status.
 
     Returns:
@@ -1556,7 +1557,7 @@ def mysql_backup_info(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_replication_status(ctx: Context) -> Dict[str, Any]:
+def mysql_replication_status(ctx: Context):
     """Show MySQL replication status.
 
     Returns:
@@ -1593,7 +1594,7 @@ def mysql_replication_status(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_query_cache_stats(ctx: Context) -> Dict[str, Any]:
+def mysql_query_cache_stats(ctx: Context):
     """Show query cache statistics.
 
     Returns:
@@ -1632,7 +1633,7 @@ def mysql_query_cache_stats(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_table_dependencies(ctx: Context, table_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_table_dependencies(ctx: Context, table_name: Optional[str] = None):
     """Find foreign key dependencies between tables.
 
     Args:
@@ -1671,7 +1672,7 @@ def mysql_table_dependencies(ctx: Context, table_name: Optional[str] = None) -> 
 # Advanced MySQL Diagnostic Tools
 
 @mcp.tool()
-def mysql_slow_queries(ctx: Context, limit: int = 20, min_duration: Optional[float] = None) -> Dict[str, Any]:
+def mysql_slow_queries(ctx: Context, limit: int = 20, min_duration: Optional[float] = None):
     """Analyze slow query log entries.
 
     Args:
@@ -1715,7 +1716,7 @@ def mysql_slow_queries(ctx: Context, limit: int = 20, min_duration: Optional[flo
 
 
 @mcp.tool()
-def mysql_deadlock_detection(ctx: Context) -> Dict[str, Any]:
+def mysql_deadlock_detection(ctx: Context):
     """Detect and analyze table deadlocks.
 
     Returns:
@@ -1751,7 +1752,7 @@ def mysql_deadlock_detection(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_partition_info(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_partition_info(table_name: str, ctx: Context):
     """Show table partitioning information.
 
     Args:
@@ -1795,7 +1796,7 @@ def mysql_partition_info(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_trigger_list(ctx: Context, table_name: Optional[str] = None, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_trigger_list(ctx: Context, table_name: Optional[str] = None, database_name: Optional[str] = None):
     """List triggers for database or specific table.
 
     Args:
@@ -1840,7 +1841,7 @@ def mysql_trigger_list(ctx: Context, table_name: Optional[str] = None, database_
 
 
 @mcp.tool()
-def mysql_stored_procedures(ctx: Context, database_name: Optional[str] = None, routine_type: Optional[str] = None) -> Dict[str, Any]:
+def mysql_stored_procedures(ctx: Context, database_name: Optional[str] = None, routine_type: Optional[str] = None):
     """List stored procedures and functions.
 
     Args:
@@ -1887,7 +1888,7 @@ def mysql_stored_procedures(ctx: Context, database_name: Optional[str] = None, r
 
 
 @mcp.tool()
-def mysql_event_scheduler(ctx: Context) -> Dict[str, Any]:
+def mysql_event_scheduler(ctx: Context):
     """Show scheduled events information.
 
     Returns:
@@ -1927,7 +1928,7 @@ def mysql_event_scheduler(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_binary_logs(ctx: Context) -> Dict[str, Any]:
+def mysql_binary_logs(ctx: Context):
     """List binary log files and positions.
 
     Returns:
@@ -1952,7 +1953,7 @@ def mysql_binary_logs(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_engine_status(ctx: Context, engine_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_engine_status(ctx: Context, engine_name: Optional[str] = None):
     """Show storage engine status information.
 
     Args:
@@ -1982,7 +1983,7 @@ def mysql_engine_status(ctx: Context, engine_name: Optional[str] = None) -> Dict
 
 
 @mcp.tool()
-def mysql_table_locks(ctx: Context) -> Dict[str, Any]:
+def mysql_table_locks(ctx: Context):
     """Show current table locks and waiting processes.
 
     Returns:
@@ -2017,7 +2018,7 @@ def mysql_table_locks(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_lock_contention(ctx: Context) -> Dict[str, Any]:
+def mysql_lock_contention(ctx: Context):
     """Analyze lock contention and waits.
 
     Returns:
@@ -2054,7 +2055,7 @@ def mysql_lock_contention(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_connection_statistics(ctx: Context) -> Dict[str, Any]:
+def mysql_connection_statistics(ctx: Context):
     """Analyze connection patterns and statistics.
 
     Returns:
@@ -2083,7 +2084,7 @@ def mysql_connection_statistics(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_schema_unused_indexes(ctx: Context) -> Dict[str, Any]:
+def mysql_schema_unused_indexes(ctx: Context):
     """Identify unused indexes in the schema.
 
     Returns:
@@ -2119,7 +2120,7 @@ def mysql_schema_unused_indexes(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_memory_usage(ctx: Context) -> Dict[str, Any]:
+def mysql_memory_usage(ctx: Context):
     """Show memory usage by database objects.
 
     Returns:
@@ -2155,7 +2156,7 @@ def mysql_memory_usage(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_io_statistics(ctx: Context, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_io_statistics(ctx: Context, database_name: Optional[str] = None):
     """Show I/O statistics for tables and indexes.
 
     Args:
@@ -2207,7 +2208,7 @@ def mysql_io_statistics(ctx: Context, database_name: Optional[str] = None) -> Di
 
 
 @mcp.tool()
-def mysql_key_cache_status(ctx: Context) -> Dict[str, Any]:
+def mysql_key_cache_status(ctx: Context):
     """Show key cache status and statistics.
 
     Returns:
@@ -2233,7 +2234,7 @@ def mysql_key_cache_status(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_auto_increment_info(ctx: Context, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_auto_increment_info(ctx: Context, database_name: Optional[str] = None):
     """Show auto-increment information for tables.
 
     Args:
@@ -2279,7 +2280,7 @@ def mysql_auto_increment_info(ctx: Context, database_name: Optional[str] = None)
 
 
 @mcp.tool()
-def mysql_fulltext_indexes(ctx: Context, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_fulltext_indexes(ctx: Context, database_name: Optional[str] = None):
     """List full-text search indexes.
 
     Args:
@@ -2327,7 +2328,7 @@ def mysql_fulltext_indexes(ctx: Context, database_name: Optional[str] = None) ->
 
 
 @mcp.tool()
-def mysql_performance_recommendations(ctx: Context) -> Dict[str, Any]:
+def mysql_performance_recommendations(ctx: Context):
     """Generate performance recommendations based on current database state.
 
     Returns:
@@ -2395,7 +2396,7 @@ def mysql_performance_recommendations(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_security_audit(ctx: Context) -> Dict[str, Any]:
+def mysql_security_audit(ctx: Context):
     """Perform basic security audit of MySQL configuration and users.
 
     Returns:
@@ -2464,7 +2465,7 @@ def mysql_security_audit(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_table_fragmentation(ctx: Context, database_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_table_fragmentation(ctx: Context, database_name: Optional[str] = None):
     """Analyze table fragmentation and suggest optimization.
 
     Args:
@@ -2533,7 +2534,7 @@ def mysql_table_fragmentation(ctx: Context, database_name: Optional[str] = None)
 
 
 @mcp.tool()
-def mysql_query_analysis(query: str, ctx: Context) -> Dict[str, Any]:
+def mysql_query_analysis(query: str, ctx: Context):
     """Comprehensive query analysis including execution plan and recommendations.
 
     Args:
@@ -2611,7 +2612,7 @@ def mysql_query_analysis(query: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_diagnostics_info(ctx: Context) -> Dict[str, Any]:
+def mysql_diagnostics_info(ctx: Context):
     """Run comprehensive diagnostics and retrieve aggregated info.
 
     Returns:
@@ -2656,7 +2657,7 @@ def mysql_diagnostics_info(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_json_validation(table_name: str, ctx: Context, column_name: Optional[str] = None) -> Dict[str, Any]:
+def mysql_json_validation(table_name: str, ctx: Context, column_name: Optional[str] = None):
     """Validate JSON columns and data.
 
     Args:
@@ -2724,7 +2725,7 @@ def mysql_json_validation(table_name: str, ctx: Context, column_name: Optional[s
 
 
 @mcp.tool()
-def mysql_create_database(database_name: str, ctx: Context, charset: str = "utf8mb4", collation: str = "utf8mb4_unicode_ci") -> Dict[str, Any]:
+def mysql_create_database(database_name: str, ctx: Context, charset: str = "utf8mb4", collation: str = "utf8mb4_unicode_ci"):
     """Create a new MySQL database.
 
     Args:
@@ -2761,7 +2762,7 @@ def mysql_create_database(database_name: str, ctx: Context, charset: str = "utf8
 
 
 @mcp.tool()
-def mysql_drop_database(database_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_drop_database(database_name: str, ctx: Context):
     """Drop a MySQL database (USE WITH CAUTION!).
 
     Args:
@@ -2799,7 +2800,7 @@ def mysql_drop_database(database_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_create_table(table_name: str, columns: List[Dict[str, str]], ctx: Context, engine: str = "InnoDB") -> Dict[str, Any]:
+def mysql_create_table(table_name: str, columns: List[Dict[str, str]], ctx: Context, engine: str = "InnoDB"):
     """Create a new table in the current database.
 
     Args:
@@ -2849,7 +2850,7 @@ def mysql_create_table(table_name: str, columns: List[Dict[str, str]], ctx: Cont
 
 
 @mcp.tool()
-def mysql_insert_data(table_name: str, data: List[Dict[str, Any]], ctx: Context) -> Dict[str, Any]:
+def mysql_insert_data(table_name: str, data: List[Dict[str, Any]], ctx: Context):
     """Insert data into a table.
 
     Args:
@@ -2899,7 +2900,7 @@ def mysql_insert_data(table_name: str, data: List[Dict[str, Any]], ctx: Context)
 
 
 @mcp.tool()
-def mysql_update_data(table_name: str, set_values: Dict[str, Any], where_clause: str, ctx: Context, params: Optional[List] = None) -> Dict[str, Any]:
+def mysql_update_data(table_name: str, set_values: Dict[str, Any], where_clause: str, ctx: Context, params: Optional[List] = None):
     """Update data in a table.
 
     Args:
@@ -2950,7 +2951,7 @@ def mysql_update_data(table_name: str, set_values: Dict[str, Any], where_clause:
 
 
 @mcp.tool()
-def mysql_delete_data(table_name: str, where_clause: str, ctx: Context, params: Optional[List] = None) -> Dict[str, Any]:
+def mysql_delete_data(table_name: str, where_clause: str, ctx: Context, params: Optional[List] = None):
     """Delete data from a table.
 
     Args:
@@ -2984,7 +2985,7 @@ def mysql_delete_data(table_name: str, where_clause: str, ctx: Context, params: 
 
 
 @mcp.tool()
-def mysql_use_database(database_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_use_database(database_name: str, ctx: Context):
     """Switch to a different database.
 
     Args:
@@ -3017,7 +3018,7 @@ def mysql_use_database(database_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_drop_table(table_name: str, ctx: Context, if_exists: bool = True) -> Dict[str, Any]:
+def mysql_drop_table(table_name: str, ctx: Context, if_exists: bool = True):
     """Drop a table from the database.
 
     Args:
@@ -3050,7 +3051,7 @@ def mysql_drop_table(table_name: str, ctx: Context, if_exists: bool = True) -> D
 
 @mcp.tool()
 def mysql_alter_table_add_column(table_name: str, column_name: str, column_type: str, ctx: Context, 
-                                 constraints: Optional[str] = None, after_column: Optional[str] = None) -> Dict[str, Any]:
+                                 constraints: Optional[str] = None, after_column: Optional[str] = None):
     """Add a column to an existing table.
 
     Args:
@@ -3095,7 +3096,7 @@ def mysql_alter_table_add_column(table_name: str, column_name: str, column_type:
 
 
 @mcp.tool()
-def mysql_alter_table_drop_column(table_name: str, column_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_alter_table_drop_column(table_name: str, column_name: str, ctx: Context):
     """Drop a column from an existing table.
 
     Args:
@@ -3132,7 +3133,7 @@ def mysql_alter_table_drop_column(table_name: str, column_name: str, ctx: Contex
 
 @mcp.tool()
 def mysql_alter_table_modify_column(table_name: str, column_name: str, new_column_type: str, 
-                                   ctx: Context, constraints: Optional[str] = None) -> Dict[str, Any]:
+                                   ctx: Context, constraints: Optional[str] = None):
     """Modify a column in an existing table.
 
     Args:
@@ -3174,7 +3175,7 @@ def mysql_alter_table_modify_column(table_name: str, column_name: str, new_colum
 
 
 @mcp.tool()
-def mysql_rename_table(old_table_name: str, new_table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_rename_table(old_table_name: str, new_table_name: str, ctx: Context):
     """Rename a table.
 
     Args:
@@ -3207,7 +3208,7 @@ def mysql_rename_table(old_table_name: str, new_table_name: str, ctx: Context) -
 
 
 @mcp.tool()
-def mysql_truncate_table(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_truncate_table(table_name: str, ctx: Context):
     """Truncate a table (remove all rows quickly).
 
     Args:
@@ -3238,7 +3239,7 @@ def mysql_truncate_table(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 @mcp.tool()
 def mysql_create_index(table_name: str, index_name: str, columns: List[str], ctx: Context, 
-                      unique: bool = False, index_type: Optional[str] = None) -> Dict[str, Any]:
+                      unique: bool = False, index_type: Optional[str] = None):
     """Create an index on a table.
 
     Args:
@@ -3288,7 +3289,7 @@ def mysql_create_index(table_name: str, index_name: str, columns: List[str], ctx
 
 
 @mcp.tool()
-def mysql_drop_index(table_name: str, index_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_drop_index(table_name: str, index_name: str, ctx: Context):
     """Drop an index from a table.
 
     Args:
@@ -3324,7 +3325,7 @@ def mysql_drop_index(table_name: str, index_name: str, ctx: Context) -> Dict[str
 
 
 @mcp.tool()
-def mysql_add_primary_key(table_name: str, columns: List[str], ctx: Context) -> Dict[str, Any]:
+def mysql_add_primary_key(table_name: str, columns: List[str], ctx: Context):
     """Add a primary key to a table.
 
     Args:
@@ -3362,7 +3363,7 @@ def mysql_add_primary_key(table_name: str, columns: List[str], ctx: Context) -> 
 
 
 @mcp.tool()
-def mysql_drop_primary_key(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_drop_primary_key(table_name: str, ctx: Context):
     """Drop the primary key from a table.
 
     Args:
@@ -3394,7 +3395,7 @@ def mysql_drop_primary_key(table_name: str, ctx: Context) -> Dict[str, Any]:
 @mcp.tool()
 def mysql_add_foreign_key(table_name: str, constraint_name: str, columns: List[str], 
                          ref_table: str, ref_columns: List[str], ctx: Context,
-                         on_delete: Optional[str] = None, on_update: Optional[str] = None) -> Dict[str, Any]:
+                         on_delete: Optional[str] = None, on_update: Optional[str] = None):
     """Add a foreign key constraint to a table.
 
     Args:
@@ -3453,7 +3454,7 @@ def mysql_add_foreign_key(table_name: str, constraint_name: str, columns: List[s
 
 
 @mcp.tool()
-def mysql_drop_foreign_key(table_name: str, constraint_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_drop_foreign_key(table_name: str, constraint_name: str, ctx: Context):
     """Drop a foreign key constraint from a table.
 
     Args:
@@ -3489,7 +3490,7 @@ def mysql_drop_foreign_key(table_name: str, constraint_name: str, ctx: Context) 
 
 
 @mcp.tool()
-def mysql_create_view(view_name: str, query: str, ctx: Context, replace: bool = False) -> Dict[str, Any]:
+def mysql_create_view(view_name: str, query: str, ctx: Context, replace: bool = False):
     """Create a view in the database.
 
     Args:
@@ -3530,7 +3531,7 @@ def mysql_create_view(view_name: str, query: str, ctx: Context, replace: bool = 
 
 
 @mcp.tool()
-def mysql_drop_view(view_name: str, ctx: Context, if_exists: bool = True) -> Dict[str, Any]:
+def mysql_drop_view(view_name: str, ctx: Context, if_exists: bool = True):
     """Drop a view from the database.
 
     Args:
@@ -3565,7 +3566,7 @@ def mysql_drop_view(view_name: str, ctx: Context, if_exists: bool = True) -> Dic
 
 
 @mcp.tool()
-def mysql_optimize_table(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_optimize_table(table_name: str, ctx: Context):
     """Optimize a table to reclaim unused space and defragment.
 
     Args:
@@ -3596,7 +3597,7 @@ def mysql_optimize_table(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_analyze_table(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_analyze_table(table_name: str, ctx: Context):
     """Analyze a table to update key distribution statistics.
 
     Args:
@@ -3627,7 +3628,7 @@ def mysql_analyze_table(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_repair_table(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_repair_table(table_name: str, ctx: Context):
     """Repair a possibly corrupted table.
 
     Args:
@@ -3658,7 +3659,7 @@ def mysql_repair_table(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_check_table(table_name: str, ctx: Context, check_type: str = "MEDIUM") -> Dict[str, Any]:
+def mysql_check_table(table_name: str, ctx: Context, check_type: str = "MEDIUM"):
     """Check a table for errors.
 
     Args:
@@ -3696,7 +3697,7 @@ def mysql_check_table(table_name: str, ctx: Context, check_type: str = "MEDIUM")
 
 
 @mcp.tool()
-def mysql_show_create_table(table_name: str, ctx: Context) -> Dict[str, Any]:
+def mysql_show_create_table(table_name: str, ctx: Context):
     """Show the CREATE TABLE statement for a table.
 
     Args:
@@ -3727,7 +3728,7 @@ def mysql_show_create_table(table_name: str, ctx: Context) -> Dict[str, Any]:
 
 @mcp.tool()
 def mysql_copy_table(source_table: str, dest_table: str, ctx: Context, 
-                   copy_data: bool = True, if_not_exists: bool = True) -> Dict[str, Any]:
+                   copy_data: bool = True, if_not_exists: bool = True):
     """Copy a table structure and optionally its data.
 
     Args:
@@ -3771,7 +3772,7 @@ def mysql_copy_table(source_table: str, dest_table: str, ctx: Context,
 
 
 @mcp.tool()
-def mysql_create_user(username: str, password: str, host: str, ctx: Context) -> Dict[str, Any]:
+def mysql_create_user(username: str, password: str, host: str, ctx: Context):
     """Create a new MySQL user.
 
     Args:
@@ -3807,7 +3808,7 @@ def mysql_create_user(username: str, password: str, host: str, ctx: Context) -> 
 
 
 @mcp.tool()
-def mysql_drop_user(username: str, host: str, ctx: Context) -> Dict[str, Any]:
+def mysql_drop_user(username: str, host: str, ctx: Context):
     """Drop a MySQL user.
 
     Args:
@@ -3843,7 +3844,7 @@ def mysql_drop_user(username: str, host: str, ctx: Context) -> Dict[str, Any]:
 
 @mcp.tool()
 def mysql_grant_privileges(username: str, host: str, privileges: str, database: str, ctx: Context, 
-                          table: Optional[str] = None) -> Dict[str, Any]:
+                          table: Optional[str] = None):
     """Grant privileges to a MySQL user.
 
     Args:
@@ -3894,7 +3895,7 @@ def mysql_grant_privileges(username: str, host: str, privileges: str, database: 
 
 @mcp.tool()
 def mysql_revoke_privileges(username: str, host: str, privileges: str, database: str, ctx: Context,
-                           table: Optional[str] = None) -> Dict[str, Any]:
+                           table: Optional[str] = None):
     """Revoke privileges from a MySQL user.
 
     Args:
@@ -3944,7 +3945,7 @@ def mysql_revoke_privileges(username: str, host: str, privileges: str, database:
 
 
 @mcp.tool()
-def mysql_show_users(ctx: Context) -> Dict[str, Any]:
+def mysql_show_users(ctx: Context):
     """Show all MySQL users.
 
     Returns:
@@ -3969,7 +3970,7 @@ def mysql_show_users(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_show_user_privileges(username: str, host: str, ctx: Context) -> Dict[str, Any]:
+def mysql_show_user_privileges(username: str, host: str, ctx: Context):
     """Show privileges for a specific user.
 
     Args:
@@ -4001,7 +4002,7 @@ def mysql_show_user_privileges(username: str, host: str, ctx: Context) -> Dict[s
 
 
 @mcp.tool()
-def mysql_change_user_password(username: str, host: str, new_password: str, ctx: Context) -> Dict[str, Any]:
+def mysql_change_user_password(username: str, host: str, new_password: str, ctx: Context):
     """Change password for a MySQL user.
 
     Args:
@@ -4037,7 +4038,7 @@ def mysql_change_user_password(username: str, host: str, new_password: str, ctx:
 
 
 @mcp.tool()
-def mysql_flush_privileges(ctx: Context) -> Dict[str, Any]:
+def mysql_flush_privileges(ctx: Context):
     """Flush MySQL privileges to reload grant tables.
 
     Returns:
@@ -4060,7 +4061,7 @@ def mysql_flush_privileges(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_show_status(ctx: Context, pattern: Optional[str] = None) -> Dict[str, Any]:
+def mysql_show_status(ctx: Context, pattern: Optional[str] = None):
     """Show MySQL server status variables.
 
     Args:
@@ -4093,7 +4094,7 @@ def mysql_show_status(ctx: Context, pattern: Optional[str] = None) -> Dict[str, 
 
 
 @mcp.tool()
-def mysql_show_engines(ctx: Context) -> Dict[str, Any]:
+def mysql_show_engines(ctx: Context):
     """Show available storage engines.
 
     Returns:
@@ -4118,7 +4119,7 @@ def mysql_show_engines(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_show_warnings(ctx: Context) -> Dict[str, Any]:
+def mysql_show_warnings(ctx: Context):
     """Show MySQL warnings from the last statement.
 
     Returns:
@@ -4143,7 +4144,7 @@ def mysql_show_warnings(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_show_errors(ctx: Context) -> Dict[str, Any]:
+def mysql_show_errors(ctx: Context):
     """Show MySQL errors from the last statement.
 
     Returns:
@@ -4168,7 +4169,7 @@ def mysql_show_errors(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_kill_process(process_id: int, ctx: Context) -> Dict[str, Any]:
+def mysql_kill_process(process_id: int, ctx: Context):
     """Kill a MySQL process.
 
     Args:
@@ -4197,7 +4198,7 @@ def mysql_kill_process(process_id: int, ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_set_variable(variable_name: str, value: str, ctx: Context, global_scope: bool = False) -> Dict[str, Any]:
+def mysql_set_variable(variable_name: str, value: str, ctx: Context, global_scope: bool = False):
     """Set a MySQL variable.
 
     Args:
@@ -4231,7 +4232,7 @@ def mysql_set_variable(variable_name: str, value: str, ctx: Context, global_scop
 
 
 @mcp.tool()
-def mysql_reset_query_cache(ctx: Context) -> Dict[str, Any]:
+def mysql_reset_query_cache(ctx: Context):
     """Reset (clear) the query cache.
 
     Returns:
@@ -4254,7 +4255,7 @@ def mysql_reset_query_cache(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_flush_logs(ctx: Context) -> Dict[str, Any]:
+def mysql_flush_logs(ctx: Context):
     """Flush MySQL logs.
 
     Returns:
@@ -4277,7 +4278,7 @@ def mysql_flush_logs(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def mysql_flush_tables(ctx: Context, table_names: Optional[List[str]] = None) -> Dict[str, Any]:
+def mysql_flush_tables(ctx: Context, table_names: Optional[List[str]] = None):
     """Flush MySQL tables.
 
     Args:
@@ -4315,7 +4316,7 @@ def mysql_flush_tables(ctx: Context, table_names: Optional[List[str]] = None) ->
 
 
 @mcp.tool()
-def mysql_lock_tables(table_locks: List[Dict[str, str]], ctx: Context) -> Dict[str, Any]:
+def mysql_lock_tables(table_locks: List[Dict[str, str]], ctx: Context):
     """Lock tables for the current session.
 
     Args:
@@ -4358,7 +4359,7 @@ def mysql_lock_tables(table_locks: List[Dict[str, str]], ctx: Context) -> Dict[s
 
 
 @mcp.tool()
-def mysql_unlock_tables(ctx: Context) -> Dict[str, Any]:
+def mysql_unlock_tables(ctx: Context):
     """Unlock all tables for the current session.
 
     Returns:
@@ -4381,7 +4382,7 @@ def mysql_unlock_tables(ctx: Context) -> Dict[str, Any]:
 
 
 @mcp.resource("mysql://tables")
-def get_tables_resource() -> str:
+def get_tables_resource():
     """Resource providing list of all tables in the database."""
     return """# Database Tables
 
@@ -4396,7 +4397,7 @@ Example usage:
 
 
 @mcp.resource("mysql://schema/{table_name}")
-def get_table_schema_resource(table_name: str) -> str:
+def get_table_schema_resource(table_name: str):
     """Resource providing schema information for a specific table."""
     return f"""# Table Schema: {table_name}
 
@@ -4412,7 +4413,7 @@ Example usage:
 
 
 @mcp.tool()
-def show_table_status(ctx: Context, table_name: str = "") -> str:
+def show_table_status(ctx: Context, table_name: str = ""):
     """Show status information for tables.
     
     Args:
@@ -4448,7 +4449,7 @@ def show_table_status(ctx: Context, table_name: str = "") -> str:
 
 
 @mcp.tool()
-def show_create_table(ctx: Context, table_name: str) -> str:
+def show_create_table(ctx: Context, table_name: str):
     """Show the CREATE TABLE statement for a table.
     
     Args:
@@ -4468,7 +4469,7 @@ def show_create_table(ctx: Context, table_name: str) -> str:
 
 
 @mcp.tool()
-def show_create_database(ctx: Context, database_name: str) -> str:
+def show_create_database(ctx: Context, database_name: str):
     """Show the CREATE DATABASE statement for a database.
     
     Args:
@@ -4488,7 +4489,7 @@ def show_create_database(ctx: Context, database_name: str) -> str:
 
 
 @mcp.tool()
-def describe_table(ctx: Context, table_name: str) -> str:
+def describe_table(ctx: Context, table_name: str):
     """Describe table structure (same as SHOW COLUMNS).
     
     Args:
@@ -4512,7 +4513,7 @@ def describe_table(ctx: Context, table_name: str) -> str:
 
 
 @mcp.tool()
-def show_triggers(ctx: Context, table_name: str = "") -> str:
+def show_triggers(ctx: Context, table_name: str = ""):
     """Show triggers for a table or all triggers.
     
     Args:
@@ -4545,7 +4546,7 @@ def show_triggers(ctx: Context, table_name: str = "") -> str:
 
 
 @mcp.tool()
-def show_events(ctx: Context) -> str:
+def show_events(ctx: Context):
     """Show scheduled events in the database."""
     try:
         db = ctx.lifespan["db"]
@@ -4571,7 +4572,7 @@ def show_events(ctx: Context) -> str:
 
 
 @mcp.tool()
-def show_function_status(ctx: Context, function_name: str = "") -> str:
+def show_function_status(ctx: Context, function_name: str = ""):
     """Show status of stored functions.
     
     Args:
@@ -4605,7 +4606,7 @@ def show_function_status(ctx: Context, function_name: str = "") -> str:
 
 
 @mcp.tool()
-def show_procedure_status(ctx: Context, procedure_name: str = "") -> str:
+def show_procedure_status(ctx: Context, procedure_name: str = ""):
     """Show status of stored procedures.
     
     Args:
@@ -4639,7 +4640,7 @@ def show_procedure_status(ctx: Context, procedure_name: str = "") -> str:
 
 
 @mcp.tool()
-def show_binary_logs(ctx: Context) -> str:
+def show_binary_logs(ctx: Context):
     """Show binary log files."""
     try:
         db = ctx.lifespan["db"]
@@ -4659,7 +4660,7 @@ def show_binary_logs(ctx: Context) -> str:
 
 
 @mcp.tool()
-def show_master_status(ctx: Context) -> str:
+def show_master_status(ctx: Context):
     """Show master status for replication."""
     try:
         db = ctx.lifespan["db"]
@@ -4682,7 +4683,7 @@ def show_master_status(ctx: Context) -> str:
 
 
 @mcp.tool()
-def show_slave_status(ctx: Context) -> str:
+def show_slave_status(ctx: Context):
     """Show slave status for replication."""
     try:
         db = ctx.lifespan["db"]
@@ -4714,7 +4715,7 @@ def show_slave_status(ctx: Context) -> str:
 
 
 @mcp.tool()
-def show_character_sets(ctx: Context) -> str:
+def show_character_sets(ctx: Context):
     """Show available character sets."""
     try:
         db = ctx.lifespan["db"]
@@ -4734,7 +4735,7 @@ def show_character_sets(ctx: Context) -> str:
 
 
 @mcp.tool()
-def show_collations(ctx: Context, charset: str = "") -> str:
+def show_collations(ctx: Context, charset: str = ""):
     """Show available collations.
     
     Args:
@@ -4763,7 +4764,7 @@ def show_collations(ctx: Context, charset: str = "") -> str:
 
 
 @mcp.tool()
-async def show_table_types() -> str:
+async def show_table_types():
     """Show available table types (storage engines)."""
     async with get_mysql_connection() as conn:
         query = "SHOW TABLE TYPES"
@@ -4780,7 +4781,7 @@ async def show_table_types() -> str:
 
 
 @mcp.tool()
-async def show_open_tables(database_name: str = "") -> str:
+async def show_open_tables(database_name: str = ""):
     """Show open tables in the table cache.
     
     Args:
@@ -4804,7 +4805,7 @@ async def show_open_tables(database_name: str = "") -> str:
 
 
 @mcp.tool()
-async def show_session_variables(pattern: str = "") -> str:
+async def show_session_variables(pattern: str = ""):
     """Show session variables.
     
     Args:
@@ -4829,7 +4830,7 @@ async def show_session_variables(pattern: str = "") -> str:
 
 
 @mcp.tool()
-async def show_global_variables(pattern: str = "") -> str:
+async def show_global_variables(pattern: str = ""):
     """Show global variables.
     
     Args:
@@ -4854,7 +4855,7 @@ async def show_global_variables(pattern: str = "") -> str:
 
 
 @mcp.tool()
-async def explain_table(table_name: str) -> str:
+async def explain_table(table_name: str):
     """Explain table structure (alias for DESCRIBE).
     
     Args:
@@ -4864,7 +4865,7 @@ async def explain_table(table_name: str) -> str:
 
 
 @mcp.tool()
-async def show_table_indexes(table_name: str) -> str:
+async def show_table_indexes(table_name: str):
     """Show all indexes for a specific table.
     
     Args:
@@ -4909,7 +4910,7 @@ async def show_table_indexes(table_name: str) -> str:
 
 
 @mcp.tool()
-async def show_grants_for_user(username: str, hostname: str = "%") -> str:
+async def show_grants_for_user(username: str, hostname: str = "%"):
     """Show grants for a specific user.
     
     Args:
@@ -4935,7 +4936,7 @@ async def show_grants_for_user(username: str, hostname: str = "%") -> str:
 
 
 @mcp.tool()
-async def list_events() -> str:
+async def list_events():
     """List all scheduled events in the database."""
     async with get_mysql_connection() as conn:
         try:
@@ -4954,7 +4955,7 @@ async def list_events() -> str:
 
 
 @mcp.tool()
-async def create_event(event_name: str, schedule: str, sql_statement: str, starts: str = "", ends: str = "") -> str:
+async def create_event(event_name: str, schedule: str, sql_statement: str, starts: str = "", ends: str = ""):
     """Create a scheduled event.
     
     Args:
@@ -4987,7 +4988,7 @@ async def create_event(event_name: str, schedule: str, sql_statement: str, start
 
 
 @mcp.tool()
-async def drop_event(event_name: str) -> str:
+async def drop_event(event_name: str):
     """Drop a scheduled event.
     
     Args:
@@ -5005,7 +5006,7 @@ async def drop_event(event_name: str) -> str:
 
 
 @mcp.tool()
-async def alter_event(event_name: str, new_schedule: str = "", new_statement: str = "", enable: bool = None) -> str:
+async def alter_event(event_name: str, new_schedule: str = "", new_statement: str = "", enable: bool = None):
     """Alter a scheduled event.
     
     Args:
@@ -5040,7 +5041,7 @@ async def alter_event(event_name: str, new_schedule: str = "", new_statement: st
 
 
 @mcp.tool()
-async def list_partitions(table_name: str) -> str:
+async def list_partitions(table_name: str):
     """List partitions for a partitioned table.
     
     Args:
@@ -5073,7 +5074,7 @@ async def list_partitions(table_name: str) -> str:
 
 
 @mcp.tool()
-async def add_partition(table_name: str, partition_name: str, partition_value: str) -> str:
+async def add_partition(table_name: str, partition_name: str, partition_value: str):
     """Add a partition to a table.
     
     Args:
@@ -5094,7 +5095,7 @@ async def add_partition(table_name: str, partition_name: str, partition_value: s
 
 
 @mcp.tool()
-async def drop_partition(table_name: str, partition_name: str) -> str:
+async def drop_partition(table_name: str, partition_name: str):
     """Drop a partition from a table.
     
     Args:
@@ -5114,7 +5115,7 @@ async def drop_partition(table_name: str, partition_name: str) -> str:
 
 
 @mcp.tool()
-async def create_role(role_name: str) -> str:
+async def create_role(role_name: str):
     """Create a new role (MySQL 8.0+).
     
     Args:
@@ -5132,7 +5133,7 @@ async def create_role(role_name: str) -> str:
 
 
 @mcp.tool()
-async def drop_role(role_name: str) -> str:
+async def drop_role(role_name: str):
     """Drop a role (MySQL 8.0+).
     
     Args:
@@ -5150,7 +5151,7 @@ async def drop_role(role_name: str) -> str:
 
 
 @mcp.tool()
-async def grant_role_to_user(role_name: str, username: str, hostname: str = "%") -> str:
+async def grant_role_to_user(role_name: str, username: str, hostname: str = "%"):
     """Grant a role to a user (MySQL 8.0+).
     
     Args:
@@ -5171,7 +5172,7 @@ async def grant_role_to_user(role_name: str, username: str, hostname: str = "%")
 
 
 @mcp.tool()
-async def revoke_role_from_user(role_name: str, username: str, hostname: str = "%") -> str:
+async def revoke_role_from_user(role_name: str, username: str, hostname: str = "%"):
     """Revoke a role from a user (MySQL 8.0+).
     
     Args:
@@ -5192,7 +5193,7 @@ async def revoke_role_from_user(role_name: str, username: str, hostname: str = "
 
 
 @mcp.tool()
-async def show_roles() -> str:
+async def show_roles():
     """Show all roles in the database (MySQL 8.0+)."""
     async with get_mysql_connection() as conn:
         try:
@@ -5211,7 +5212,7 @@ async def show_roles() -> str:
 
 
 @mcp.tool()
-async def create_user_with_ssl(username: str, hostname: str, password: str, ssl_type: str = "SSL") -> str:
+async def create_user_with_ssl(username: str, hostname: str, password: str, ssl_type: str = "SSL"):
     """Create a user with SSL requirements.
     
     Args:
@@ -5238,7 +5239,7 @@ async def create_user_with_ssl(username: str, hostname: str, password: str, ssl_
 
 
 @mcp.tool()
-async def create_stored_procedure(proc_name: str, parameters: str, body: str) -> str:
+async def create_stored_procedure(proc_name: str, parameters: str, body: str):
     """Create a stored procedure.
     
     Args:
@@ -5266,7 +5267,7 @@ async def create_stored_procedure(proc_name: str, parameters: str, body: str) ->
 
 
 @mcp.tool()
-async def drop_stored_procedure(proc_name: str) -> str:
+async def drop_stored_procedure(proc_name: str):
     """Drop a stored procedure.
     
     Args:
@@ -5284,7 +5285,7 @@ async def drop_stored_procedure(proc_name: str) -> str:
 
 
 @mcp.tool()
-async def list_stored_procedures() -> str:
+async def list_stored_procedures():
     """List all stored procedures in the current database."""
     async with get_mysql_connection() as conn:
         try:
@@ -5313,7 +5314,7 @@ async def list_stored_procedures() -> str:
 
 
 @mcp.tool()
-async def create_function(func_name: str, parameters: str, return_type: str, body: str, deterministic: bool = False) -> str:
+async def create_function(func_name: str, parameters: str, return_type: str, body: str, deterministic: bool = False):
     """Create a stored function.
     
     Args:
@@ -5347,7 +5348,7 @@ async def create_function(func_name: str, parameters: str, return_type: str, bod
 
 
 @mcp.tool()
-async def drop_stored_function(func_name: str) -> str:
+async def drop_stored_function(func_name: str):
     """Drop a stored function.
     
     Args:
@@ -5365,7 +5366,7 @@ async def drop_stored_function(func_name: str) -> str:
 
 
 @mcp.tool()
-async def analyze_index_usage(table_name: str = "") -> str:
+async def analyze_index_usage(table_name: str = ""):
     """Analyze index usage statistics.
     
     Args:
@@ -5410,7 +5411,7 @@ async def analyze_index_usage(table_name: str = "") -> str:
 
 
 @mcp.tool()
-async def identify_redundant_indexes() -> str:
+async def identify_redundant_indexes():
     """Identify potentially redundant indexes."""
     async with get_mysql_connection() as conn:
         try:
@@ -5468,7 +5469,7 @@ async def identify_redundant_indexes() -> str:
 
 
 @mcp.tool()
-async def rebuild_table_indexes(table_name: str) -> str:
+async def rebuild_table_indexes(table_name: str):
     """Rebuild all indexes for a table.
     
     Args:
@@ -5486,7 +5487,7 @@ async def rebuild_table_indexes(table_name: str) -> str:
 
 
 @mcp.prompt()
-def generate_sql_query(task: str, table_name: str = "") -> str:
+def generate_sql_query(task: str, table_name: str = ""):
     """Generate SQL query based on task description.
     
     Args:
@@ -5506,7 +5507,7 @@ Make sure the query is safe and follows best practices."""
 
 
 @mcp.prompt()
-def analyze_query_performance(query: str) -> str:
+def analyze_query_performance(query: str):
     """Analyze SQL query performance and suggest optimizations.
     
     Args:
@@ -5565,7 +5566,7 @@ Usage:
 
 
 @mcp.tool()
-async def mysql_show_user_tables(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_user_tables(ctx: Context):
     """Show tables owned by the current MySQL user."""
     try:
         async with get_mysql_connection() as conn:
@@ -5585,7 +5586,7 @@ async def mysql_show_user_tables(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_show_table_engines(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_table_engines(ctx: Context):
     """Show available storage engines in the MySQL server."""
     try:
         async with get_mysql_connection() as conn:
@@ -5605,7 +5606,7 @@ async def mysql_show_table_engines(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_show_table_partitions(ctx: Context, table_name: str) -> Dict[str, Any]:
+async def mysql_show_table_partitions(ctx: Context, table_name: str):
     """Show partitioning information for a table if partitioned."""
     try:
         async with get_mysql_connection() as conn:
@@ -5635,7 +5636,7 @@ async def mysql_show_table_partitions(ctx: Context, table_name: str) -> Dict[str
         }
 
 @mcp.tool()
-async def mysql_show_table_constraints(ctx: Context, table_name: str) -> Dict[str, Any]:
+async def mysql_show_table_constraints(ctx: Context, table_name: str):
     """Show constraints for a given table (primary keys, unique, foreign keys)."""
     try:
         async with get_mysql_connection() as conn:
@@ -5664,7 +5665,7 @@ async def mysql_show_table_constraints(ctx: Context, table_name: str) -> Dict[st
         }
 
 @mcp.tool()
-async def mysql_show_foreign_keys(ctx: Context, table_name: str) -> Dict[str, Any]:
+async def mysql_show_foreign_keys(ctx: Context, table_name: str):
     """Show foreign key constraints for a table."""
     try:
         db = ctx.lifespan["db"]
@@ -5691,7 +5692,7 @@ async def mysql_show_foreign_keys(ctx: Context, table_name: str) -> Dict[str, An
         }
 
 @mcp.tool()
-async def mysql_show_check_constraints(ctx: Context, table_name: str) -> Dict[str, Any]:
+async def mysql_show_check_constraints(ctx: Context, table_name: str):
     """Show CHECK constraints for a table."""
     try:
         db = ctx.lifespan["db"]
@@ -5720,7 +5721,7 @@ async def mysql_show_check_constraints(ctx: Context, table_name: str) -> Dict[st
         }
 
 @mcp.tool()
-async def mysql_show_table_triggers(ctx: Context, table_name: str) -> Dict[str, Any]:
+async def mysql_show_table_triggers(ctx: Context, table_name: str):
     """List triggers defined on a table."""
     try:
         db = ctx.lifespan["db"]
@@ -5743,7 +5744,7 @@ async def mysql_show_table_triggers(ctx: Context, table_name: str) -> Dict[str, 
         }
 
 @mcp.tool()
-async def mysql_show_procedure_params(ctx: Context, procedure_name: str) -> Dict[str, Any]:
+async def mysql_show_procedure_params(ctx: Context, procedure_name: str):
     """Show parameters of a stored procedure."""
     try:
         db = ctx.lifespan["db"]
@@ -5770,7 +5771,7 @@ async def mysql_show_procedure_params(ctx: Context, procedure_name: str) -> Dict
         }
 
 @mcp.tool()
-async def mysql_show_function_params(ctx: Context, function_name: str) -> Dict[str, Any]:
+async def mysql_show_function_params(ctx: Context, function_name: str):
     """Show parameters of a stored function."""
     try:
         db = ctx.lifespan["db"]
@@ -5796,7 +5797,7 @@ async def mysql_show_function_params(ctx: Context, function_name: str) -> Dict[s
         }
 
 @mcp.tool()
-async def mysql_show_events(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_events(ctx: Context):
     """List all scheduled events."""
     try:
         db = ctx.lifespan["db"]
@@ -5816,7 +5817,7 @@ async def mysql_show_events(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_show_processlist(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_processlist(ctx: Context):
     """Show the current process list."""
     try:
         db = ctx.lifespan["db"]
@@ -5836,7 +5837,7 @@ async def mysql_show_processlist(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_show_status_variables(ctx: Context, pattern: str = None) -> Dict[str, Any]:
+async def mysql_show_status_variables(ctx: Context, pattern: str = None):
     """Show server status variables, optionally filtered by pattern."""
     try:
         db = ctx.lifespan["db"]
@@ -5861,7 +5862,7 @@ async def mysql_show_status_variables(ctx: Context, pattern: str = None) -> Dict
         }
 
 @mcp.tool()
-async def mysql_show_variables(ctx: Context, pattern: str = None) -> Dict[str, Any]:
+async def mysql_show_variables(ctx: Context, pattern: str = None):
     """Show server system variables, optionally filtered by pattern."""
     try:
         db = ctx.lifespan["db"]
@@ -5885,7 +5886,7 @@ async def mysql_show_variables(ctx: Context, pattern: str = None) -> Dict[str, A
         }
 
 @mcp.tool()
-async def mysql_show_tables_information(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_tables_information(ctx: Context):
     """Show comprehensive information about all tables in current database."""
     try:
         db = ctx.lifespan["db"]
@@ -5905,7 +5906,7 @@ async def mysql_show_tables_information(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_show_engines_status(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_engines_status(ctx: Context):
     """Show detailed status of all storage engines."""
     try:
         db = ctx.lifespan["db"]
@@ -5925,7 +5926,7 @@ async def mysql_show_engines_status(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_show_memory_status(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_memory_status(ctx: Context):
     """Show memory usage statistics."""
     try:
         db = ctx.lifespan["db"]
@@ -5945,7 +5946,7 @@ async def mysql_show_memory_status(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_show_replication_status(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_replication_status(ctx: Context):
     """Show replication status including master and slave."""
     try:
         db = ctx.lifespan["db"]
@@ -5975,7 +5976,7 @@ async def mysql_show_replication_status(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_show_error_log(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_error_log(ctx: Context):
     """Read the MySQL error log file content. (Requires file access privileges)"""
     import os
     try:
@@ -5992,7 +5993,7 @@ async def mysql_show_error_log(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_show_variables_status(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_variables_status(ctx: Context):
     """Show all MySQL variables and status in one combined report."""
     try:
         db = ctx.lifespan["db"]
@@ -6008,7 +6009,7 @@ async def mysql_show_variables_status(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_show_schemas(ctx: Context) -> Dict[str, Any]:
+async def mysql_show_schemas(ctx: Context):
     """Show all available database schemas."""
     try:
         db = ctx.lifespan["db"]
@@ -6024,7 +6025,7 @@ async def mysql_show_schemas(ctx: Context) -> Dict[str, Any]:
         return {"success": False, "error": str(e), "error_type": type(e).__name__}
 
 @mcp.tool()
-async def mysql_show_slow_log(ctx: Context, limit: int = 10) -> Dict[str, Any]:
+async def mysql_show_slow_log(ctx: Context, limit: int = 10):
     """Show recent entries from the slow query log."""
     try:
         db = ctx.lifespan["db"]
@@ -6040,7 +6041,7 @@ async def mysql_show_slow_log(ctx: Context, limit: int = 10) -> Dict[str, Any]:
 
 
 @mcp.tool()
-async def mysql_query_cache_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_query_cache_analysis(ctx: Context):
     """Analyze query cache performance and configuration."""
     try:
         db = ctx.lifespan["db"]
@@ -6064,7 +6065,7 @@ async def mysql_query_cache_analysis(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_innodb_buffer_pool_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_innodb_buffer_pool_analysis(ctx: Context):
     """Detailed analysis of InnoDB buffer pool performance."""
     try:
         db = ctx.lifespan["db"]
@@ -6119,7 +6120,7 @@ async def mysql_innodb_buffer_pool_analysis(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_innodb_lock_waits(ctx: Context) -> Dict[str, Any]:
+async def mysql_innodb_lock_waits(ctx: Context):
     """Show detailed InnoDB lock wait information."""
     try:
         db = ctx.lifespan["db"]
@@ -6155,7 +6156,7 @@ async def mysql_innodb_lock_waits(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_table_compression_analysis(ctx: Context, schema_name: str = None) -> Dict[str, Any]:
+async def mysql_table_compression_analysis(ctx: Context, schema_name: str = None):
     """Analyze table compression ratios and storage efficiency."""
     try:
         db = ctx.lifespan["db"]
@@ -6196,7 +6197,7 @@ async def mysql_table_compression_analysis(ctx: Context, schema_name: str = None
         }
 
 @mcp.tool()
-async def mysql_connection_thread_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_connection_thread_analysis(ctx: Context):
     """Analyze connection threads and their resource usage."""
     try:
         db = ctx.lifespan["db"]
@@ -6249,7 +6250,7 @@ async def mysql_connection_thread_analysis(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_query_digest_analysis(ctx: Context, limit: int = 10) -> Dict[str, Any]:
+async def mysql_query_digest_analysis(ctx: Context, limit: int = 10):
     """Analyze query digest statistics for performance optimization."""
     try:
         db = ctx.lifespan["db"]
@@ -6303,7 +6304,7 @@ async def mysql_query_digest_analysis(ctx: Context, limit: int = 10) -> Dict[str
         }
 
 @mcp.tool()
-async def mysql_partition_performance_analysis(ctx: Context, schema_name: str = None, table_name: str = None) -> Dict[str, Any]:
+async def mysql_partition_performance_analysis(ctx: Context, schema_name: str = None, table_name: str = None):
     """Analyze partition performance and pruning effectiveness."""
     try:
         db = ctx.lifespan["db"]
@@ -6361,7 +6362,7 @@ async def mysql_partition_performance_analysis(ctx: Context, schema_name: str = 
         }
 
 @mcp.tool()
-async def mysql_foreign_key_dependency_analysis(ctx: Context, schema_name: str = None) -> Dict[str, Any]:
+async def mysql_foreign_key_dependency_analysis(ctx: Context, schema_name: str = None):
     """Analyze foreign key dependencies and referential integrity."""
     try:
         db = ctx.lifespan["db"]
@@ -6404,7 +6405,7 @@ async def mysql_foreign_key_dependency_analysis(ctx: Context, schema_name: str =
         }
 
 @mcp.tool()
-async def mysql_table_space_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_table_space_analysis(ctx: Context):
     """Analyze tablespace usage and file system layout."""
     try:
         db = ctx.lifespan["db"]
@@ -6441,7 +6442,7 @@ async def mysql_table_space_analysis(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_innodb_metrics_analysis(ctx: Context, metric_pattern: str = None) -> Dict[str, Any]:
+async def mysql_innodb_metrics_detailed_analysis(ctx: Context, metric_pattern: str = None):
     """Analyze InnoDB performance metrics and counters."""
     try:
         db = ctx.lifespan["db"]
@@ -6484,7 +6485,7 @@ async def mysql_innodb_metrics_analysis(ctx: Context, metric_pattern: str = None
         }
 
 @mcp.tool()
-async def mysql_performance_schema_setup_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_performance_schema_setup_analysis(ctx: Context):
     """Analyze Performance Schema configuration and instrumentation setup."""
     try:
         db = ctx.lifespan["db"]
@@ -6531,7 +6532,7 @@ async def mysql_performance_schema_setup_analysis(ctx: Context) -> Dict[str, Any
         }
 
 @mcp.tool()
-async def mysql_memory_usage_by_thread(ctx: Context, limit: int = 20) -> Dict[str, Any]:
+async def mysql_memory_usage_by_thread(ctx: Context, limit: int = 20):
     """Analyze memory usage by thread for performance optimization."""
     try:
         db = ctx.lifespan["db"]
@@ -6571,7 +6572,7 @@ async def mysql_memory_usage_by_thread(ctx: Context, limit: int = 20) -> Dict[st
         }
 
 @mcp.tool()
-async def mysql_index_usage_effectiveness(ctx: Context, schema_name: str = None) -> Dict[str, Any]:
+async def mysql_index_usage_effectiveness(ctx: Context, schema_name: str = None):
     """Analyze index usage effectiveness and identify unused indexes."""
     try:
         db = ctx.lifespan["db"]
@@ -6618,7 +6619,7 @@ async def mysql_index_usage_effectiveness(ctx: Context, schema_name: str = None)
         }
 
 @mcp.tool()
-async def mysql_temp_table_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_temp_table_analysis(ctx: Context):
     """Analyze temporary table usage and identify optimization opportunities."""
     try:
         db = ctx.lifespan["db"]
@@ -6676,7 +6677,7 @@ async def mysql_temp_table_analysis(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_ssl_connection_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_ssl_connection_analysis(ctx: Context):
     """Analyze SSL/TLS connection configuration and usage."""
     try:
         db = ctx.lifespan["db"]
@@ -6725,7 +6726,7 @@ async def mysql_ssl_connection_analysis(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_charset_collation_analysis(ctx: Context, schema_name: str = None) -> Dict[str, Any]:
+async def mysql_charset_collation_analysis(ctx: Context, schema_name: str = None):
     """Analyze character set and collation usage across databases and tables."""
     try:
         db = ctx.lifespan["db"]
@@ -6805,7 +6806,7 @@ async def mysql_charset_collation_analysis(ctx: Context, schema_name: str = None
         }
 
 @mcp.tool()
-async def mysql_replication_lag_analysis(ctx: Context) -> Dict[str, Any]:
+async def mysql_replication_lag_analysis(ctx: Context):
     """Analyze replication lag and slave status for monitoring purposes."""
     try:
         db = ctx.lifespan["db"]
@@ -6879,7 +6880,7 @@ async def mysql_replication_lag_analysis(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_query_optimizer_analysis(ctx: Context, query: str) -> Dict[str, Any]:
+async def mysql_query_optimizer_analysis(ctx: Context, query: str):
     """Analyze query execution plan and optimizer decisions."""
     try:
         db = ctx.lifespan["db"]
@@ -6941,7 +6942,7 @@ async def mysql_query_optimizer_analysis(ctx: Context, query: str) -> Dict[str, 
         }
 
 @mcp.tool()
-async def mysql_comprehensive_health_check(ctx: Context) -> Dict[str, Any]:
+async def mysql_comprehensive_health_check(ctx: Context):
     """Perform a comprehensive MySQL server health check and diagnostics."""
     try:
         db = ctx.lifespan["db"]
@@ -7087,7 +7088,7 @@ async def mysql_comprehensive_health_check(ctx: Context) -> Dict[str, Any]:
         }
 
 @mcp.tool()
-async def mysql_buffer_pool_hit_ratio(ctx: Context) -> dict:
+async def mysql_buffer_pool_hit_ratio(ctx: Context):
     """Calculate and analyze InnoDB buffer pool hit ratio and efficiency."""
     try:
         db = ctx.lifespan["db"]
@@ -7148,7 +7149,7 @@ async def mysql_buffer_pool_hit_ratio(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_temp_table_usage(ctx: Context) -> dict:
+async def mysql_temp_table_usage(ctx: Context):
     """Analyze MySQL thread pool status and performance metrics."""
     try:
         db = ctx.lifespan["db"]
@@ -7190,7 +7191,7 @@ async def mysql_temp_table_usage(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_query_cache_performance(ctx: Context) -> dict:
+async def mysql_query_cache_performance(ctx: Context):
     """Analyze query cache hit ratio and efficiency metrics."""
     try:
         db = ctx.lifespan["db"]
@@ -7236,7 +7237,7 @@ async def mysql_query_cache_performance(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_deadlock_analysis(ctx: Context) -> dict:
+async def mysql_deadlock_analysis(ctx: Context):
     """Analyze recent deadlocks and lock contention patterns."""
     try:
         db = ctx.lifespan["db"]
@@ -7296,7 +7297,7 @@ async def mysql_deadlock_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_connection_thread_analysis(ctx: Context) -> dict:
+async def mysql_io_statistics_analysis(ctx: Context):
     """Analyze MySQL I/O statistics and disk usage patterns."""
     try:
         db = ctx.lifespan["db"]
@@ -7346,7 +7347,7 @@ async def mysql_connection_thread_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_memory_usage_breakdown(ctx: Context) -> dict:
+async def mysql_memory_usage_breakdown(ctx: Context):
     """Provide detailed breakdown of MySQL memory usage by component."""
     try:
         db = ctx.lifespan["db"]
@@ -7416,7 +7417,7 @@ async def mysql_memory_usage_breakdown(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_plugin_and_components_status(ctx: Context) -> dict:
+async def mysql_plugin_and_components_status(ctx: Context):
     """Show status of MySQL plugins and components."""
     try:
         db = ctx.lifespan["db"]
@@ -7474,7 +7475,7 @@ async def mysql_plugin_and_components_status(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_ssl_encryption_status(ctx: Context) -> dict:
+async def mysql_ssl_encryption_status(ctx: Context):
     """Analyze SSL/TLS encryption status and certificate information."""
     try:
         async with get_mysql_connection() as db:
@@ -7531,7 +7532,7 @@ async def mysql_ssl_encryption_status(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_binary_log_analysis(ctx: Context) -> dict:
+async def mysql_binary_log_analysis(ctx: Context):
     """Analyze binary log configuration, usage, and replication impact."""
     try:
         async with get_mysql_connection() as db:
@@ -7585,7 +7586,7 @@ async def mysql_binary_log_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_optimizer_statistics_analysis(ctx: Context) -> dict:
+async def mysql_optimizer_statistics_analysis(ctx: Context):
     """Analyze query optimizer statistics and histogram data."""
     try:
         async with get_mysql_connection() as db:
@@ -7666,7 +7667,7 @@ async def mysql_optimizer_statistics_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_backup_recovery_status(ctx: Context) -> dict:
+async def mysql_backup_recovery_status(ctx: Context):
     """Analyze backup and recovery configuration and status."""
     try:
         async with get_mysql_connection() as db:
@@ -7727,7 +7728,7 @@ async def mysql_backup_recovery_status(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_connection_audit_analysis(ctx: Context) -> dict:
+async def mysql_connection_audit_analysis(ctx: Context):
     """Perform security audit of connections, users, and access patterns."""
     try:
         async with get_mysql_connection() as db:
@@ -7833,7 +7834,7 @@ async def mysql_connection_audit_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_resource_consumption_analysis(ctx: Context) -> dict:
+async def mysql_resource_consumption_analysis(ctx: Context):
     """Analyze resource consumption patterns by users, databases, and operations."""
     try:
         async with get_mysql_connection() as db:
@@ -7932,7 +7933,7 @@ async def mysql_resource_consumption_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_innodb_lock_analysis(ctx: Context) -> dict:
+async def mysql_innodb_lock_analysis(ctx: Context):
     """Analyze InnoDB redo log and undo log configuration and usage."""
     try:
         async with get_mysql_connection() as db:
@@ -7988,7 +7989,7 @@ async def mysql_innodb_lock_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_adaptive_hash_index_analysis(ctx: Context) -> dict:
+async def mysql_adaptive_hash_index_analysis(ctx: Context):
     """Analyze InnoDB Adaptive Hash Index usage and effectiveness."""
     try:
         async with get_mysql_connection() as db:
@@ -8051,7 +8052,7 @@ async def mysql_adaptive_hash_index_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_event_scheduler_analysis(ctx: Context) -> dict:
+async def mysql_event_scheduler_analysis(ctx: Context):
     """Analyze MySQL Event Scheduler status, events, and execution history."""
     try:
         async with get_mysql_connection() as db:
@@ -8140,7 +8141,7 @@ async def mysql_event_scheduler_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_partition_management_analysis(ctx: Context) -> dict:
+async def mysql_partition_management_analysis(ctx: Context):
     """Analyze table partitioning configuration and partition statistics."""
     try:
         async with get_mysql_connection() as db:
@@ -8250,7 +8251,7 @@ async def mysql_partition_management_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_comprehensive_performance_summary(ctx: Context) -> dict:
+async def mysql_comprehensive_performance_summary(ctx: Context):
     """Generate a comprehensive performance summary combining multiple metrics."""
     try:
         async with get_mysql_connection() as db:
@@ -8413,7 +8414,7 @@ async def mysql_comprehensive_performance_summary(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_adaptive_index_fragmentation_analysis(ctx: Context) -> dict:
+async def mysql_adaptive_index_fragmentation_analysis(ctx: Context):
     """Performs an adaptive analysis of index fragmentation and provides recommendations."""
     try:
         db = ctx.lifespan["db"]
@@ -8441,7 +8442,7 @@ async def mysql_adaptive_index_fragmentation_analysis(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_query_pattern_clustering(ctx: Context) -> dict:
+async def mysql_query_pattern_clustering(ctx: Context):
     """Identifies clustered patterns and anomalies in query executions."""
     try:
         db = ctx.lifespan["db"]
@@ -8468,7 +8469,7 @@ async def mysql_query_pattern_clustering(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_deadlock_scenario_reconstruction(ctx: Context) -> dict:
+async def mysql_deadlock_scenario_reconstruction(ctx: Context):
     """Reconstructs detailed scenarios of recent deadlocks."""
     try:
         db = ctx.lifespan["db"]
@@ -8490,7 +8491,7 @@ async def mysql_deadlock_scenario_reconstruction(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_user_activity_patterns(ctx: Context) -> dict:
+async def mysql_user_activity_patterns(ctx: Context):
     """Analyzes granular user activity and access patterns."""
     try:
         db = ctx.lifespan["db"]
@@ -8516,7 +8517,7 @@ async def mysql_user_activity_patterns(ctx: Context) -> dict:
         }
 
 @mcp.tool()
-async def mysql_lock_wait_analysis(ctx: Context) -> dict:
+async def mysql_lock_wait_analysis(ctx: Context):
     """Analyzes historical and real-time lock wait scenarios."""
     try:
         db = ctx.lifespan["db"]
@@ -8592,6 +8593,7 @@ else:
 
 def windows_only(func):
     """Decorator to mark functions as Windows-only"""
+    @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         if not IS_WINDOWS:
             return f"Error: {func.__name__} is only available on Windows systems"
@@ -8845,7 +8847,7 @@ class OfficeMCPIntegration:
 
         return ""
 
-    def execute_office_command(self, app: str, command: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    def execute_office_command(self, app: str, command: str, params: Dict[str, Any]):
         """Execute Office.js command via JavaScript injection"""
 
         try:
@@ -8889,58 +8891,58 @@ class OfficeMCPIntegration:
             return {"status": "error", "message": str(e)}
 
     # Individual command handlers
-    def word_insert_text(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def word_insert_text(self, params: Dict[str, Any]):
         return self.execute_office_command("Word", "InsertText", params)
 
-    def word_replace_all_text(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def word_replace_all_text(self, params: Dict[str, Any]):
         return self.execute_office_command("Word", "ReplaceAllText", params)
 
-    def word_get_selection(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def word_get_selection(self, params: Dict[str, Any]):
         return self.execute_office_command("Word", "GetSelection", params)
 
-    def word_insert_paragraph(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def word_insert_paragraph(self, params: Dict[str, Any]):
         return self.execute_office_command("Word", "InsertParagraph", params)
 
-    def word_set_document_title(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def word_set_document_title(self, params: Dict[str, Any]):
         return self.execute_office_command("Word", "SetDocumentTitle", params)
 
-    def excel_set_range_values(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def excel_set_range_values(self, params: Dict[str, Any]):
         return self.execute_office_command("Excel", "SetRangeValues", params)
 
-    def excel_get_range_values(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def excel_get_range_values(self, params: Dict[str, Any]):
         return self.execute_office_command("Excel", "GetRangeValues", params)
 
-    def excel_add_worksheet(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def excel_add_worksheet(self, params: Dict[str, Any]):
         return self.execute_office_command("Excel", "AddWorksheet", params)
 
-    def excel_create_chart(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def excel_create_chart(self, params: Dict[str, Any]):
         return self.execute_office_command("Excel", "CreateChart", params)
 
-    def excel_format_range(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def excel_format_range(self, params: Dict[str, Any]):
         return self.execute_office_command("Excel", "FormatRange", params)
 
-    def powerpoint_insert_slide(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def powerpoint_insert_slide(self, params: Dict[str, Any]):
         return self.execute_office_command("PowerPoint", "InsertSlide", params)
 
-    def powerpoint_delete_slide(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def powerpoint_delete_slide(self, params: Dict[str, Any]):
         return self.execute_office_command("PowerPoint", "DeleteSlide", params)
 
-    def powerpoint_set_slide_title(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def powerpoint_set_slide_title(self, params: Dict[str, Any]):
         return self.execute_office_command("PowerPoint", "SetSlideTitle", params)
 
-    def powerpoint_add_textbox(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def powerpoint_add_textbox(self, params: Dict[str, Any]):
         return self.execute_office_command("PowerPoint", "AddTextBox", params)
 
-    def outlook_create_draft(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def outlook_create_draft(self, params: Dict[str, Any]):
         return self.execute_office_command("Outlook", "CreateDraft", params)
 
-    def outlook_send_email(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def outlook_send_email(self, params: Dict[str, Any]):
         return self.execute_office_command("Outlook", "SendEmail", params)
 
-    def outlook_get_current_message(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def outlook_get_current_message(self, params: Dict[str, Any]):
         return self.execute_office_command("Outlook", "GetCurrentMessage", params)
 
-    def outlook_add_attachment(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def outlook_add_attachment(self, params: Dict[str, Any]):
         return self.execute_office_command("Outlook", "AddAttachment", params)
 
 # Global Office integration instance
@@ -8951,7 +8953,7 @@ office_integration = OfficeMCPIntegration()
 # ==============================================================================
 
 @mcp.tool()
-async def ml_monitor_comprehensive_status() -> str:
+async def ml_monitor_comprehensive_status():
     """
     Get comprehensive ML monitoring system status with data analytics and training readiness.
     
@@ -9022,7 +9024,7 @@ async def ml_monitor_comprehensive_status() -> str:
         return f"Error generating ML monitor status: {str(e)}"
 
 @mcp.tool()
-async def check_ml_system_processes() -> str:
+async def check_ml_system_processes():
     """
     Check if ML monitoring processes are currently running on the system.
     
@@ -9097,7 +9099,7 @@ async def check_ml_system_processes() -> str:
         return f"Error checking ML processes: {str(e)}"
 
 @mcp.tool()
-async def get_data_collection_summary() -> str:
+async def get_data_collection_summary():
     """
     Get comprehensive data collection statistics from all monitoring sources.
     
@@ -9173,7 +9175,7 @@ async def get_data_collection_summary() -> str:
         return f"Error getting data collection summary: {str(e)}"
 
 @mcp.tool()
-async def assess_training_readiness() -> str:
+async def assess_training_readiness():
     """Assess ML model training readiness with progress indicators"""
     try:
         assessment = []
@@ -9223,7 +9225,7 @@ async def assess_training_readiness() -> str:
         return f"Error assessing training readiness: {str(e)}"
 
 @mcp.tool()
-async def analyze_data_quality() -> str:
+async def analyze_data_quality():
     """Analyze data quality metrics with freshness and diversity analysis"""
     try:
         quality_report = []
@@ -9280,7 +9282,7 @@ async def analyze_data_quality() -> str:
         return f"Error analyzing data quality: {str(e)}"
 
 @mcp.tool()
-async def check_integration_bridge() -> str:
+async def check_integration_bridge():
     """Check integration bridge status and activity logs"""
     try:
         bridge_status = []
@@ -9347,7 +9349,7 @@ async def check_integration_bridge() -> str:
         return f"Error checking integration bridge: {str(e)}"
 
 @mcp.tool()
-async def get_ml_engine_performance() -> str:
+async def get_ml_engine_performance():
     """Get ML engine performance metrics and statistics"""
     try:
         performance = []
@@ -9497,7 +9499,7 @@ def save_user_preferences(preferences: dict):
         print(f"Error saving preferences: {e}")
 
 @mcp.tool()
-async def set_user_preference(category: str, key: str, value: str) -> str:
+async def set_user_preference(category: str, key: str, value: str):
     """Set a user preference (e.g., favorite song, default browser)"""
     try:
         preferences = load_user_preferences()
@@ -9510,7 +9512,7 @@ async def set_user_preference(category: str, key: str, value: str) -> str:
         return f"Error setting preference: {str(e)}"
 
 @mcp.tool()
-async def get_user_preference(category: str, key: str) -> str:
+async def get_user_preference(category: str, key: str):
     """Get a user preference"""
     try:
         preferences = load_user_preferences()
@@ -9522,7 +9524,7 @@ async def get_user_preference(category: str, key: str) -> str:
         return f"Error getting preference: {str(e)}"
 
 @mcp.tool()
-async def list_user_preferences() -> str:
+async def list_user_preferences():
     """List all user preferences"""
     try:
         preferences = load_user_preferences()
@@ -9543,7 +9545,7 @@ async def list_user_preferences() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def open_youtube_with_search(search_query: str = "") -> str:
+async def open_youtube_with_search(search_query: str = ""):
     """Open YouTube and search for a specific song/video"""
     try:
         if search_query:
@@ -9557,7 +9559,7 @@ async def open_youtube_with_search(search_query: str = "") -> str:
         return f"Error opening YouTube: {str(e)}"
 
 @mcp.tool()
-async def play_favorite_song() -> str:
+async def play_favorite_song():
     """Play user's favorite song on YouTube"""
     try:
         preferences = load_user_preferences()
@@ -9570,7 +9572,7 @@ async def play_favorite_song() -> str:
         return f"Error playing favorite song: {str(e)}"
 
 @mcp.tool()
-async def open_app_with_url(app_name: str, url: str = "") -> str:
+async def open_app_with_url(app_name: str, url: str = ""):
     """Open an application with optional URL/parameters"""
     try:
         app_mappings = {
@@ -9593,7 +9595,7 @@ async def open_app_with_url(app_name: str, url: str = "") -> str:
         return f"Error opening {app_name}: {str(e)}"
 
 @mcp.tool()
-async def smart_music_action(action: str = "play_favorite") -> str:
+async def smart_music_action(action: str = "play_favorite"):
     """Smart music actions - play favorite, open music service, etc."""
     try:
         if action == "play_favorite":
@@ -9608,7 +9610,7 @@ async def smart_music_action(action: str = "play_favorite") -> str:
         return f"Error with music action: {str(e)}"
 
 @mcp.tool()
-async def add_to_playlist(song_name: str) -> str:
+async def add_to_playlist(song_name: str):
     """Add a song to user's playlist"""
     try:
         preferences = load_user_preferences()
@@ -9626,7 +9628,7 @@ async def add_to_playlist(song_name: str) -> str:
         return f"Error adding to playlist: {str(e)}"
 
 @mcp.tool()
-async def show_playlist() -> str:
+async def show_playlist():
     """Show user's current playlist"""
     try:
         preferences = load_user_preferences()
@@ -9642,7 +9644,7 @@ async def show_playlist() -> str:
         return f"Error showing playlist: {str(e)}"
 
 @mcp.tool()
-async def get_system_info() -> str:
+async def get_system_info():
     """Get comprehensive Windows system information."""
     try:
         info = []
@@ -9666,7 +9668,7 @@ async def get_system_info() -> str:
         return f"Error getting system info: {str(e)}"
 
 @mcp.tool()
-async def list_processes() -> str:
+async def list_processes():
     """List all running processes."""
     try:
         processes = []
@@ -9682,7 +9684,7 @@ async def list_processes() -> str:
         return f"Error listing processes: {str(e)}"
 
 @mcp.tool()
-async def get_installed_programs() -> str:
+async def get_installed_programs():
     """Get list of installed programs from Windows registry."""
     try:
         programs = []
@@ -9728,7 +9730,7 @@ async def get_installed_programs() -> str:
         return f"Error getting installed programs: {str(e)}"
 
 @mcp.tool()
-async def get_startup_programs() -> str:
+async def get_startup_programs():
     """Get programs that start with Windows."""
     try:
         startup_info = []
@@ -9761,7 +9763,7 @@ async def get_startup_programs() -> str:
         return f"Error getting startup programs: {str(e)}"
 
 @mcp.tool()
-async def run_command(command: str) -> str:
+async def run_command(command: str):
     """Run a Windows command with enhanced safety checks."""
     try:
         dangerous_commands = [
@@ -9793,7 +9795,7 @@ async def run_command(command: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def next_photo() -> str:
+async def next_photo():
     """Go to next photo in Lightroom"""
     try:
         pyautogui.hotkey('ctrl', 'right')
@@ -9802,7 +9804,7 @@ async def next_photo() -> str:
         return f"Error moving to next photo: {str(e)}"
 
 @mcp.tool()
-async def previous_photo() -> str:
+async def previous_photo():
     """Go to previous photo in Lightroom"""
     try:
         pyautogui.hotkey('ctrl', 'left')
@@ -9811,7 +9813,7 @@ async def previous_photo() -> str:
         return f"Error moving to previous photo: {str(e)}"
 
 @mcp.tool()
-async def first_photo() -> str:
+async def first_photo():
     """Go to first photo in Lightroom"""
     try:
         pyautogui.hotkey('ctrl', 'home')
@@ -9820,7 +9822,7 @@ async def first_photo() -> str:
         return f"Error moving to first photo: {str(e)}"
 
 @mcp.tool()
-async def last_photo() -> str:
+async def last_photo():
     """Go to last photo in Lightroom"""
     try:
         pyautogui.hotkey('ctrl', 'end')
@@ -9964,7 +9966,7 @@ class UserAction:
         self.action_type = self.action_type.strip()[:100]  # Limit length
         self.application = self.application.strip()[:100]
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self):
         """Convert to dictionary with proper serialization"""
         return {
             'action_type': self.action_type,
@@ -9990,7 +9992,7 @@ class SystemMetrics:
         self.disk_io = max(0.0, self.disk_io)
         self.network_io = max(0.0, self.network_io)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self):
         """Convert to dictionary with proper serialization"""
         return {
             'timestamp': self.timestamp.isoformat(),
@@ -10161,7 +10163,7 @@ class EnhancedDataCollector:
             ml_logger.error(f"Error saving data: {e}")
             return False
     
-    def get_data_quality_report(self) -> Dict[str, Any]:
+    def get_data_quality_report(self):
         """Generate comprehensive data quality report"""
         return {
             'total_actions': len(self.actions),
@@ -10191,7 +10193,7 @@ try:
         def __init__(self):
             self.is_trained = False
         
-        def train_model(self) -> Dict[str, Any]:
+        def train_model(self):
             try:
                 # Mock training logic
                 if len(data_collector.actions) < 10:
@@ -10208,7 +10210,7 @@ try:
                 ml_logger.error(f"Error in behavior model training: {e}")
                 return {'error': str(e)}
         
-        def predict_next_action(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        def predict_next_action(self, context: Dict[str, Any]):
             try:
                 if not self.is_trained:
                     return {'error': 'Model not trained yet'}
@@ -10227,7 +10229,7 @@ try:
         def __init__(self):
             self.is_trained = False
         
-        def train_model(self) -> Dict[str, Any]:
+        def train_model(self):
             try:
                 if len(data_collector.metrics) < 10:
                     return {'error': 'Insufficient data for training (minimum 10 metrics required)'}
@@ -10243,7 +10245,7 @@ try:
                 ml_logger.error(f"Error in system optimizer training: {e}")
                 return {'error': str(e)}
         
-        def predict_system_load(self) -> Dict[str, Any]:
+        def predict_system_load(self):
             try:
                 if not self.is_trained:
                     return {'error': 'Model not trained yet'}
@@ -10275,7 +10277,7 @@ except Exception as e:
     print("Install required packages: pip install scikit-learn pandas numpy psutil")
 
 @mcp.tool()
-async def record_user_action(action_type: str, application: str, duration: float = 1.0, success: bool = True) -> str:
+async def record_user_action(action_type: str, application: str, duration: float = 1.0, success: bool = True):
     """
     Record a user action for machine learning training and behavior analysis.
     
@@ -10314,7 +10316,7 @@ async def record_user_action(action_type: str, application: str, duration: float
         return f"Error recording action: {str(e)}"
 
 @mcp.tool()
-async def record_system_metrics() -> str:
+async def record_system_metrics():
     """
     Record current system metrics for machine learning training and performance analysis.
     
@@ -10334,7 +10336,7 @@ async def record_system_metrics() -> str:
         return f"Error recording metrics: {str(e)}"
 
 @mcp.tool()
-async def train_behavior_model() -> str:
+async def train_behavior_model():
     """Train the user behavior prediction model"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10352,7 +10354,7 @@ async def train_behavior_model() -> str:
         return f"Error training model: {str(e)}"
 
 @mcp.tool()
-async def predict_next_action(context: str = "") -> str:
+async def predict_next_action(context: str = ""):
     """Predict the user's next likely action"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10378,7 +10380,7 @@ async def predict_next_action(context: str = "") -> str:
         return f"Error predicting action: {str(e)}"
 
 @mcp.tool()
-async def train_system_optimizer() -> str:
+async def train_system_optimizer():
     """Train the system optimization model"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10396,7 +10398,7 @@ async def train_system_optimizer() -> str:
         return f"Error training optimizer: {str(e)}"
 
 @mcp.tool()
-async def predict_system_load() -> str:
+async def predict_system_load():
     """Predict future system load"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10414,7 +10416,7 @@ async def predict_system_load() -> str:
         return f"Error predicting load: {str(e)}"
 
 @mcp.tool()
-async def get_automation_recommendations() -> str:
+async def get_automation_recommendations():
     """Get smart automation recommendations based on usage patterns"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10483,7 +10485,7 @@ async def get_automation_recommendations() -> str:
         return f"Error getting recommendations: {str(e)}"
 
 @mcp.tool()
-async def get_ml_stats() -> str:
+async def get_ml_stats():
     """Get ML engine statistics and status"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10564,7 +10566,7 @@ async def get_ml_stats() -> str:
         return f"Error getting stats: {str(e)}"
 
 @mcp.tool()
-async def auto_optimize_system() -> str:
+async def auto_optimize_system():
     """Automatically optimize system based on ML predictions"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10610,7 +10612,7 @@ async def auto_optimize_system() -> str:
         return f"Error optimizing system: {str(e)}"
 
 @mcp.tool()
-async def get_last_metric() -> str:
+async def get_last_metric():
     """Get the most recent ML metric."""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10630,7 +10632,7 @@ async def get_last_metric() -> str:
         return f"Error fetching last metric: {str(e)}"
 
 @mcp.tool()
-async def start_ml_monitoring() -> str:
+async def start_ml_monitoring():
     """Start comprehensive ML monitoring and data collection"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10682,7 +10684,7 @@ async def start_ml_monitoring() -> str:
         return f"Error starting integrated monitoring: {str(e)}"
 
 @mcp.tool()
-async def stop_ml_monitoring() -> str:
+async def stop_ml_monitoring():
     """Stop continuous ML monitoring"""
     if not ML_AVAILABLE:
         return "ML engine not available"
@@ -10890,7 +10892,7 @@ def stop_background_monitoring():
         return False
 
 @mcp.tool()
-async def get_window_list() -> str:
+async def get_window_list():
     """Get list of all open windows"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -10910,7 +10912,7 @@ async def get_window_list() -> str:
         return f"Error getting window list: {str(e)}"
 
 @mcp.tool()
-async def focus_window(window_title: str) -> str:
+async def focus_window(window_title: str):
     """Focus on a specific window by title (partial match)"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -10932,7 +10934,7 @@ async def focus_window(window_title: str) -> str:
         return f"Error focusing window: {str(e)}"
 
 @mcp.tool()
-async def take_screenshot(filename: str = "screenshot.png") -> str:
+async def take_screenshot(filename: str = "screenshot.png"):
     """Take a screenshot of the entire screen"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -10945,7 +10947,7 @@ async def take_screenshot(filename: str = "screenshot.png") -> str:
         return f"Error taking screenshot: {str(e)}"
 
 @mcp.tool()
-async def click_at_coordinates(x: int, y: int, button: str = "left") -> str:
+async def click_at_coordinates(x: int, y: int, button: str = "left"):
     """Click at specific screen coordinates"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -10962,7 +10964,7 @@ async def click_at_coordinates(x: int, y: int, button: str = "left") -> str:
         return f"Error clicking at coordinates: {str(e)}"
 
 @mcp.tool()
-async def type_text(text: str, interval: float = 0.01) -> str:
+async def type_text(text: str, interval: float = 0.01):
     """Type text with specified interval between characters"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -10974,7 +10976,7 @@ async def type_text(text: str, interval: float = 0.01) -> str:
         return f"Error typing text: {str(e)}"
 
 @mcp.tool()
-async def send_keyboard_shortcut(keys: str) -> str:
+async def send_keyboard_shortcut(keys: str):
     """Send keyboard shortcut (e.g., 'ctrl+c', 'alt+tab', 'win+r')"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -10987,7 +10989,7 @@ async def send_keyboard_shortcut(keys: str) -> str:
         return f"Error sending keyboard shortcut: {str(e)}"
 
 @mcp.tool()
-async def find_image_on_screen(image_path: str, confidence: float = 0.8) -> str:
+async def find_image_on_screen(image_path: str, confidence: float = 0.8):
     """Find an image on the screen and return its coordinates"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11006,7 +11008,7 @@ async def find_image_on_screen(image_path: str, confidence: float = 0.8) -> str:
         return f"Error finding image: {str(e)}"
 
 @mcp.tool()
-async def click_image_if_found(image_path: str, confidence: float = 0.8) -> str:
+async def click_image_if_found(image_path: str, confidence: float = 0.8):
     """Find and click an image on the screen"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11026,7 +11028,7 @@ async def click_image_if_found(image_path: str, confidence: float = 0.8) -> str:
         return f"Error clicking image: {str(e)}"
 
 @mcp.tool()
-async def scroll_screen(direction: str, clicks: int = 3) -> str:
+async def scroll_screen(direction: str, clicks: int = 3):
     """Scroll the screen in specified direction (up/down)"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11044,7 +11046,7 @@ async def scroll_screen(direction: str, clicks: int = 3) -> str:
         return f"Error scrolling: {str(e)}"
 
 @mcp.tool()
-async def drag_and_drop(start_x: int, start_y: int, end_x: int, end_y: int, duration: float = 0.5) -> str:
+async def drag_and_drop(start_x: int, start_y: int, end_x: int, end_y: int, duration: float = 0.5):
     """Drag from start coordinates to end coordinates"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11056,7 +11058,7 @@ async def drag_and_drop(start_x: int, start_y: int, end_x: int, end_y: int, dura
         return f"Error dragging: {str(e)}"
 
 @mcp.tool()
-async def get_mouse_position() -> str:
+async def get_mouse_position():
     """Get current mouse cursor position"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11068,7 +11070,7 @@ async def get_mouse_position() -> str:
         return f"Error getting mouse position: {str(e)}"
 
 @mcp.tool()
-async def move_mouse(x: int, y: int, duration: float = 0.25) -> str:
+async def move_mouse(x: int, y: int, duration: float = 0.25):
     """Move mouse to specified coordinates"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11084,7 +11086,7 @@ async def move_mouse(x: int, y: int, duration: float = 0.25) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def wifi_profiles_list() -> str:
+async def wifi_profiles_list():
     """List saved WiFi profiles"""
     try:
         result = subprocess.run(
@@ -11098,7 +11100,7 @@ async def wifi_profiles_list() -> str:
         return f"Error listing WiFi profiles: {str(e)}"
 
 @mcp.tool()
-async def wifi_scan_networks() -> str:
+async def wifi_scan_networks():
     """Scan for available WiFi networks"""
     try:
         result = subprocess.run(
@@ -11121,7 +11123,7 @@ async def wifi_scan_networks() -> str:
         return f"Error scanning WiFi networks: {str(e)}"
 
 @mcp.tool()
-async def wifi_connect_profile(profile_name: str) -> str:
+async def wifi_connect_profile(profile_name: str):
     """Connect to a saved WiFi profile"""
     try:
         result = subprocess.run(
@@ -11139,7 +11141,7 @@ async def wifi_connect_profile(profile_name: str) -> str:
         return f"Error connecting to WiFi: {str(e)}"
 
 @mcp.tool()
-async def wifi_disconnect() -> str:
+async def wifi_disconnect():
     """Disconnect from current WiFi network"""
     try:
         result = subprocess.run(
@@ -11157,7 +11159,7 @@ async def wifi_disconnect() -> str:
         return f"Error disconnecting from WiFi: {str(e)}"
 
 @mcp.tool()
-async def wifi_delete_profile(profile_name: str) -> str:
+async def wifi_delete_profile(profile_name: str):
     """Delete a saved WiFi profile"""
     try:
         result = subprocess.run(
@@ -11175,7 +11177,7 @@ async def wifi_delete_profile(profile_name: str) -> str:
         return f"Error deleting WiFi profile: {str(e)}"
 
 @mcp.tool()
-async def wifi_show_profile_details(profile_name: str) -> str:
+async def wifi_show_profile_details(profile_name: str):
     """Show detailed information about a WiFi profile"""
     try:
         result = subprocess.run(
@@ -11190,7 +11192,7 @@ async def wifi_show_profile_details(profile_name: str) -> str:
         return f"Error showing WiFi profile details: {str(e)}"
 
 @mcp.tool()
-async def wifi_show_interfaces() -> str:
+async def wifi_show_interfaces():
     """Show WiFi adapter interfaces and their status"""
     try:
         result = subprocess.run(
@@ -11205,7 +11207,7 @@ async def wifi_show_interfaces() -> str:
         return f"Error showing WiFi interfaces: {str(e)}"
 
 @mcp.tool()
-async def wifi_show_drivers() -> str:
+async def wifi_show_drivers():
     """Show WiFi driver information"""
     try:
         result = subprocess.run(
@@ -11220,7 +11222,7 @@ async def wifi_show_drivers() -> str:
         return f"Error showing WiFi drivers: {str(e)}"
 
 @mcp.tool()
-async def wifi_export_profile(profile_name: str, export_path: str = ".") -> str:
+async def wifi_export_profile(profile_name: str, export_path: str = "."):
     """Export a WiFi profile to XML file"""
     try:
         result = subprocess.run(
@@ -11238,7 +11240,7 @@ async def wifi_export_profile(profile_name: str, export_path: str = ".") -> str:
         return f"Error exporting WiFi profile: {str(e)}"
 
 @mcp.tool()
-async def wifi_import_profile(xml_file_path: str) -> str:
+async def wifi_import_profile(xml_file_path: str):
     """Import a WiFi profile from XML file"""
     try:
         if not os.path.exists(xml_file_path):
@@ -11259,7 +11261,7 @@ async def wifi_import_profile(xml_file_path: str) -> str:
         return f"Error importing WiFi profile: {str(e)}"
 
 @mcp.tool()
-async def wifi_create_hotspot(ssid: str, password: str) -> str:
+async def wifi_create_hotspot(ssid: str, password: str):
     """Create a WiFi hotspot (requires administrative privileges)"""
     try:
         # Set up hosted network
@@ -11289,7 +11291,7 @@ async def wifi_create_hotspot(ssid: str, password: str) -> str:
         return f"Error creating WiFi hotspot: {str(e)}"
 
 @mcp.tool()
-async def wifi_stop_hotspot() -> str:
+async def wifi_stop_hotspot():
     """Stop the WiFi hotspot"""
     try:
         result = subprocess.run(
@@ -11307,7 +11309,7 @@ async def wifi_stop_hotspot() -> str:
         return f"Error stopping WiFi hotspot: {str(e)}"
 
 @mcp.tool()
-async def wifi_hotspot_status() -> str:
+async def wifi_hotspot_status():
     """Show WiFi hotspot status"""
     try:
         result = subprocess.run(
@@ -11322,7 +11324,7 @@ async def wifi_hotspot_status() -> str:
         return f"Error showing WiFi hotspot status: {str(e)}"
 
 @mcp.tool()
-async def wifi_signal_strength() -> str:
+async def wifi_signal_strength():
     """Show signal strength of current and nearby networks"""
     try:
         # Get current connection info
@@ -11346,7 +11348,7 @@ async def wifi_signal_strength() -> str:
         return f"Error showing WiFi signal strength: {str(e)}"
 
 @mcp.tool()
-async def wifi_network_report() -> str:
+async def wifi_network_report():
     """Generate a comprehensive WiFi network report"""
     try:
         # Generate WLAN report
@@ -11362,7 +11364,7 @@ async def wifi_network_report() -> str:
         return f"Error generating WiFi network report: {str(e)}"
 
 @mcp.tool()
-async def wifi_adapter_reset() -> str:
+async def wifi_adapter_reset():
     """Reset WiFi adapter (disable and re-enable)"""
     try:
         # Get WiFi adapter name first
@@ -11395,7 +11397,7 @@ async def wifi_adapter_reset() -> str:
         return f"Error resetting WiFi adapter: {str(e)}"
 
 @mcp.tool()
-async def wifi_troubleshoot() -> str:
+async def wifi_troubleshoot():
     """Run WiFi troubleshooting diagnostics"""
     try:
         # Run network diagnostics
@@ -11419,7 +11421,7 @@ async def wifi_troubleshoot() -> str:
         return f"Error running WiFi troubleshooting: {str(e)}"
 
 @mcp.tool()
-async def wifi_power_management() -> str:
+async def wifi_power_management():
     """Show and manage WiFi adapter power settings"""
     try:
         # Get power management settings via PowerShell
@@ -11435,7 +11437,7 @@ async def wifi_power_management() -> str:
         return f"Error showing WiFi power management: {str(e)}"
 
 @mcp.tool()
-async def wifi_security_audit() -> str:
+async def wifi_security_audit():
     """Perform a WiFi security audit of saved profiles"""
     try:
         security_report = ["WiFi Security Audit Report:", "=" * 40]
@@ -11812,7 +11814,7 @@ class ChromeAutomation:
 chrome_automation = ChromeAutomation()
 
 @mcp.tool()
-async def start_web_automation(headless: bool = False) -> str:
+async def start_web_automation(headless: bool = False):
     """Start web browser automation (requires Chrome and ChromeDriver)"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11826,7 +11828,7 @@ async def start_web_automation(headless: bool = False) -> str:
         return f"Error starting web automation: {str(e)}"
 
 @mcp.tool()
-async def navigate_to_url(url: str) -> str:
+async def navigate_to_url(url: str):
     """Navigate to a specific URL"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11840,7 +11842,7 @@ async def navigate_to_url(url: str) -> str:
         return f"Error navigating to URL: {str(e)}"
 
 @mcp.tool()
-async def find_and_click_element(selector: str, selector_type: str = "css") -> str:
+async def find_and_click_element(selector: str, selector_type: str = "css"):
     """Find and click an element on the webpage using Chrome automation"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11869,7 +11871,7 @@ async def find_and_click_element(selector: str, selector_type: str = "css") -> s
         return f"Error clicking element: {str(e)}"
 
 @mcp.tool()
-async def type_in_element(selector: str, text: str, selector_type: str = "css") -> str:
+async def type_in_element(selector: str, text: str, selector_type: str = "css"):
     """Type text into an element on the webpage"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11899,7 +11901,7 @@ async def type_in_element(selector: str, text: str, selector_type: str = "css") 
         return f"Error typing in element: {str(e)}"
 
 @mcp.tool()
-async def get_page_title() -> str:
+async def get_page_title():
     """Get the current page title"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11914,7 +11916,7 @@ async def get_page_title() -> str:
         return f"Error getting page title: {str(e)}"
 
 @mcp.tool()
-async def close_web_automation() -> str:
+async def close_web_automation():
     """Close the web automation browser"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -11939,7 +11941,7 @@ except ImportError:
     OFFICE_INTEGRATION_AVAILABLE = False
 
 @mcp.tool()
-async def office_execute_command(app: str, command: str, params_json: str) -> str:
+async def office_execute_command(app: str, command: str, params_json: str):
     """Execute Office.js command for Microsoft 365 apps"""
     try:
         params = json.loads(params_json)
@@ -11949,7 +11951,7 @@ async def office_execute_command(app: str, command: str, params_json: str) -> st
         return f"Error executing Office command: {str(e)}"
 
 @mcp.tool()
-async def word_insert_text(location: str = "selection", text: str = "Hello from MCP!") -> str:
+async def word_insert_text(location: str = "selection", text: str = "Hello from MCP!"):
     """Insert text at the current selection in Word"""
     try:
         params = {"location": location, "text": text}
@@ -11959,7 +11961,7 @@ async def word_insert_text(location: str = "selection", text: str = "Hello from 
         return f"Error inserting text in Word: {str(e)}"
 
 @mcp.tool()
-async def word_replace_all_text(search: str, replace: str) -> str:
+async def word_replace_all_text(search: str, replace: str):
     """Find and replace all instances of text in Word"""
     try:
         params = {"search": search, "replace": replace}
@@ -11969,7 +11971,7 @@ async def word_replace_all_text(search: str, replace: str) -> str:
         return f"Error replacing text in Word: {str(e)}"
 
 @mcp.tool()
-async def excel_set_range_values(sheet: str = "Sheet1", range_addr: str = "A1", values: str = "[[\"Hello\", \"World\"]]") -> str:
+async def excel_set_range_values(sheet: str = "Sheet1", range_addr: str = "A1", values: str = "[[\"Hello\", \"World\"]]"):
     """Set values in an Excel range"""
     try:
         values_array = json.loads(values)
@@ -11980,7 +11982,7 @@ async def excel_set_range_values(sheet: str = "Sheet1", range_addr: str = "A1", 
         return f"Error setting Excel range values: {str(e)}"
 
 @mcp.tool()
-async def excel_add_worksheet(name: str = "NewSheet") -> str:
+async def excel_add_worksheet(name: str = "NewSheet"):
     """Add a new worksheet to Excel"""
     try:
         params = {"name": name}
@@ -11990,7 +11992,7 @@ async def excel_add_worksheet(name: str = "NewSheet") -> str:
         return f"Error adding Excel worksheet: {str(e)}"
 
 @mcp.tool()
-async def powerpoint_insert_slide(layout: str = "Title and Content", title: str = "New Slide") -> str:
+async def powerpoint_insert_slide(layout: str = "Title and Content", title: str = "New Slide"):
     """Insert a new slide in PowerPoint"""
     try:
         params = {"layout": layout, "title": title}
@@ -12000,7 +12002,7 @@ async def powerpoint_insert_slide(layout: str = "Title and Content", title: str 
         return f"Error inserting PowerPoint slide: {str(e)}"
 
 @mcp.tool()
-async def outlook_create_draft(to: str, subject: str, body: str) -> str:
+async def outlook_create_draft(to: str, subject: str, body: str):
     """Create a new email draft in Outlook"""
     try:
         params = {"to": to, "subject": subject, "body": body}
@@ -12010,7 +12012,7 @@ async def outlook_create_draft(to: str, subject: str, body: str) -> str:
         return f"Error creating Outlook draft: {str(e)}"
 
 @mcp.tool()
-async def office_get_supported_commands() -> str:
+async def office_get_supported_commands():
     """Get list of all supported Office commands"""
     try:
         commands = {}
@@ -12026,7 +12028,7 @@ async def office_get_supported_commands() -> str:
         return f"Error getting supported commands: {str(e)}"
 
 @mcp.tool()
-async def office_create_manifest() -> str:
+async def office_create_manifest():
     """Create a basic Office Add-in manifest template"""
     try:
         manifest_content = """
@@ -12072,7 +12074,7 @@ async def office_create_manifest() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def spotify_close_app() -> str:
+async def spotify_close_app():
     """Quit Spotify application"""
     try:
         await close_app("spotify")
@@ -12081,7 +12083,7 @@ async def spotify_close_app() -> str:
         return f"❌ Error closing Spotify: {str(e)}"
 
 @mcp.tool()
-async def spotify_minimize_window() -> str:
+async def spotify_minimize_window():
     """Minimize Spotify window"""
     try:
         await focus_window("Spotify")
@@ -12092,7 +12094,7 @@ async def spotify_minimize_window() -> str:
         return f"❌ Error minimizing Spotify window: {str(e)}"
 
 @mcp.tool()
-async def spotify_maximize_window() -> str:
+async def spotify_maximize_window():
     """Maximize Spotify window"""
     try:
         await focus_window("Spotify")
@@ -12103,7 +12105,7 @@ async def spotify_maximize_window() -> str:
         return f"❌ Error maximizing Spotify window: {str(e)}"
 
 @mcp.tool()
-async def spotify_click_element(element: str) -> str:
+async def spotify_click_element(element: str):
     """Click specified element in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12142,7 +12144,7 @@ async def spotify_click_element(element: str) -> str:
         return f"❌ Error clicking element: {str(e)}"
 
 @mcp.tool()
-async def spotify_scroll_playlist(direction: str, clicks: int = 3) -> str:
+async def spotify_scroll_playlist(direction: str, clicks: int = 3):
     """Scroll in a playlist view"""
     try:
         await focus_window("Spotify")
@@ -12155,7 +12157,7 @@ async def spotify_scroll_playlist(direction: str, clicks: int = 3) -> str:
         return f"❌ Error scrolling playlist: {str(e)}"
 
 @mcp.tool()
-async def spotify_press_key(shortcut: str) -> str:
+async def spotify_press_key(shortcut: str):
     """Press keyboard shortcut in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12167,7 +12169,7 @@ async def spotify_press_key(shortcut: str) -> str:
 
 # 🔄 SYNC & REFRESH COMMANDS
 @mcp.tool()
-async def spotify_refresh_playlists() -> str:
+async def spotify_refresh_playlists():
     """Refresh current playlists"""
     try:
         await focus_window("Spotify")
@@ -12177,7 +12179,7 @@ async def spotify_refresh_playlists() -> str:
         return f"❌ Error refreshing playlists: {str(e)}"
 
 @mcp.tool()
-async def spotify_sync_library() -> str:
+async def spotify_sync_library():
     """Sync offline library data"""
     try:
         await focus_window("Spotify")
@@ -12188,7 +12190,7 @@ async def spotify_sync_library() -> str:
         return f"❌ Error syncing library: {str(e)}"
 
 @mcp.tool()
-async def spotify_download_playlist(playlist_name: str) -> str:
+async def spotify_download_playlist(playlist_name: str):
     """Download a playlist for offline playback"""
     try:
         await focus_window("Spotify")
@@ -12200,7 +12202,7 @@ async def spotify_download_playlist(playlist_name: str) -> str:
         return f"❌ Error downloading playlist: {str(e)}"
 
 @mcp.tool()
-async def spotify_delete_downloaded_content() -> str:
+async def spotify_delete_downloaded_content():
     """Clear downloaded tracks"""
     try:
         await focus_window("Spotify")
@@ -12216,7 +12218,7 @@ async def spotify_delete_downloaded_content() -> str:
 
 # ✅ Core Playback Commands
 @mcp.tool()
-async def spotify_play() -> str:
+async def spotify_play():
     """Play the current track in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12226,7 +12228,7 @@ async def spotify_play() -> str:
         return f"❌ Error playing Spotify: {str(e)}"
 
 @mcp.tool()
-async def spotify_pause() -> str:
+async def spotify_pause():
     """Pause playback in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12236,7 +12238,7 @@ async def spotify_pause() -> str:
         return f"❌ Error pausing Spotify: {str(e)}"
 
 @mcp.tool()
-async def spotify_toggle_play_pause() -> str:
+async def spotify_toggle_play_pause():
     """Toggle between play and pause in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12246,7 +12248,7 @@ async def spotify_toggle_play_pause() -> str:
         return f"❌ Error toggling Spotify playback: {str(e)}"
 
 @mcp.tool()
-async def spotify_next_track() -> str:
+async def spotify_next_track():
     """Skip to the next track in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12256,7 +12258,7 @@ async def spotify_next_track() -> str:
         return f"❌ Error skipping to next track: {str(e)}"
 
 @mcp.tool()
-async def spotify_previous_track() -> str:
+async def spotify_previous_track():
     """Return to the previous track in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12266,7 +12268,7 @@ async def spotify_previous_track() -> str:
         return f"❌ Error going to previous track: {str(e)}"
 
 @mcp.tool()
-async def spotify_seek_to_time(minutes: int, seconds: int = 0) -> str:
+async def spotify_seek_to_time(minutes: int, seconds: int = 0):
     """Seek to a specific timestamp in the track"""
     try:
         await focus_window("Spotify")
@@ -12281,7 +12283,7 @@ async def spotify_seek_to_time(minutes: int, seconds: int = 0) -> str:
         return f"❌ Error seeking in Spotify: {str(e)}"
 
 @mcp.tool()
-async def spotify_set_volume(percentage: int) -> str:
+async def spotify_set_volume(percentage: int):
     """Set volume to a specific percentage (0-100)"""
     try:
         percentage = max(0, min(100, percentage))  # Clamp between 0-100
@@ -12303,7 +12305,7 @@ async def spotify_set_volume(percentage: int) -> str:
         return f"❌ Error setting Spotify volume: {str(e)}"
 
 @mcp.tool()
-async def spotify_mute() -> str:
+async def spotify_mute():
     """Mute Spotify audio"""
     try:
         await focus_window("Spotify")
@@ -12313,7 +12315,7 @@ async def spotify_mute() -> str:
         return f"❌ Error muting Spotify: {str(e)}"
 
 @mcp.tool()
-async def spotify_unmute() -> str:
+async def spotify_unmute():
     """Unmute Spotify audio"""
     try:
         await focus_window("Spotify")
@@ -12324,7 +12326,7 @@ async def spotify_unmute() -> str:
 
 # 🔍 Search & Browse Commands
 @mcp.tool()
-async def spotify_search_and_play_track(track_name: str) -> str:
+async def spotify_search_and_play_track(track_name: str):
     """Search for a track by name and play it immediately"""
     try:
         await focus_window("Spotify")
@@ -12339,7 +12341,7 @@ async def spotify_search_and_play_track(track_name: str) -> str:
         return f"❌ Error searching and playing track: {str(e)}"
 
 @mcp.tool()
-async def spotify_search_track(track_name: str) -> str:
+async def spotify_search_track(track_name: str):
     """Search for a track by name in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12352,7 +12354,7 @@ async def spotify_search_track(track_name: str) -> str:
         return f"❌ Error searching for track: {str(e)}"
 
 @mcp.tool()
-async def spotify_search_artist(artist_name: str) -> str:
+async def spotify_search_artist(artist_name: str):
     """Search for an artist in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12365,7 +12367,7 @@ async def spotify_search_artist(artist_name: str) -> str:
         return f"❌ Error searching for artist: {str(e)}"
 
 @mcp.tool()
-async def spotify_search_album(album_name: str) -> str:
+async def spotify_search_album(album_name: str):
     """Search for an album in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12378,7 +12380,7 @@ async def spotify_search_album(album_name: str) -> str:
         return f"❌ Error searching for album: {str(e)}"
 
 @mcp.tool()
-async def spotify_search_playlist(playlist_name: str) -> str:
+async def spotify_search_playlist(playlist_name: str):
     """Search for a playlist in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12391,7 +12393,7 @@ async def spotify_search_playlist(playlist_name: str) -> str:
         return f"❌ Error searching for playlist: {str(e)}"
 
 @mcp.tool()
-async def spotify_browse_genres() -> str:
+async def spotify_browse_genres():
     """Browse music by genre in Spotify"""
     try:
         await focus_window("Spotify")
@@ -12403,7 +12405,7 @@ async def spotify_browse_genres() -> str:
         return f"❌ Error browsing genres: {str(e)}"
 
 @mcp.tool()
-async def spotify_open_discover_weekly() -> str:
+async def spotify_open_discover_weekly():
     """Open Discover Weekly playlist"""
     try:
         await focus_window("Spotify")
@@ -12418,7 +12420,7 @@ async def spotify_open_discover_weekly() -> str:
         return f"❌ Error opening Discover Weekly: {str(e)}"
 
 @mcp.tool()
-async def spotify_open_release_radar() -> str:
+async def spotify_open_release_radar():
     """Open Release Radar playlist"""
     try:
         await focus_window("Spotify")
@@ -12434,7 +12436,7 @@ async def spotify_open_release_radar() -> str:
 
 # 💾 Library & Playlist Management
 @mcp.tool()
-async def spotify_add_track_to_library() -> str:
+async def spotify_add_track_to_library():
     """Save the current track to liked songs"""
     try:
         await focus_window("Spotify")
@@ -12444,7 +12446,7 @@ async def spotify_add_track_to_library() -> str:
         return f"❌ Error adding track to library: {str(e)}"
 
 @mcp.tool()
-async def spotify_remove_track_from_library() -> str:
+async def spotify_remove_track_from_library():
     """Remove the current track from liked songs"""
     try:
         await focus_window("Spotify")
@@ -12454,7 +12456,7 @@ async def spotify_remove_track_from_library() -> str:
         return f"❌ Error removing track from library: {str(e)}"
 
 @mcp.tool()
-async def spotify_create_playlist(playlist_name: str) -> str:
+async def spotify_create_playlist(playlist_name: str):
     """Create a new playlist"""
     try:
         await focus_window("Spotify")
@@ -12467,7 +12469,7 @@ async def spotify_create_playlist(playlist_name: str) -> str:
         return f"❌ Error creating playlist: {str(e)}"
 
 @mcp.tool()
-async def spotify_like_track() -> str:
+async def spotify_like_track():
     """Like the currently playing track"""
     try:
         await focus_window("Spotify")
@@ -12477,7 +12479,7 @@ async def spotify_like_track() -> str:
         return f"❌ Error liking track: {str(e)}"
 
 @mcp.tool()
-async def spotify_dislike_track() -> str:
+async def spotify_dislike_track():
     """Dislike the current track (for recommendation training)"""
     try:
         await focus_window("Spotify")
@@ -12488,7 +12490,7 @@ async def spotify_dislike_track() -> str:
 
 # 🧠 Contextual and Smart Commands
 @mcp.tool()
-async def spotify_play_based_on_mood(mood: str) -> str:
+async def spotify_play_based_on_mood(mood: str):
     """Play a playlist matching a mood"""
     try:
         await focus_window("Spotify")
@@ -12503,7 +12505,7 @@ async def spotify_play_based_on_mood(mood: str) -> str:
         return f"❌ Error playing mood playlist: {str(e)}"
 
 @mcp.tool()
-async def spotify_play_genre(genre: str) -> str:
+async def spotify_play_genre(genre: str):
     """Start a playlist for a specific genre"""
     try:
         await focus_window("Spotify")
@@ -12518,7 +12520,7 @@ async def spotify_play_genre(genre: str) -> str:
         return f"❌ Error playing genre: {str(e)}"
 
 @mcp.tool()
-async def spotify_play_song_by_artist(artist: str, song: str) -> str:
+async def spotify_play_song_by_artist(artist: str, song: str):
     """Play a specific song by artist"""
     try:
         # First ensure Spotify is open
@@ -12563,7 +12565,7 @@ async def spotify_play_song_by_artist(artist: str, song: str) -> str:
         return f"❌ Error playing song: {str(e)}"
 
 @mcp.tool()
-async def spotify_resume_last_played() -> str:
+async def spotify_resume_last_played():
     """Resume last playlist or album"""
     try:
         await focus_window("Spotify")
@@ -12573,7 +12575,7 @@ async def spotify_resume_last_played() -> str:
         return f"❌ Error resuming playback: {str(e)}"
 
 @mcp.tool()
-async def spotify_play_podcast(podcast_name: str) -> str:
+async def spotify_play_podcast(podcast_name: str):
     """Play a specific podcast"""
     try:
         await focus_window("Spotify")
@@ -12589,7 +12591,7 @@ async def spotify_play_podcast(podcast_name: str) -> str:
 
 # 👥 Collaborative & Social Commands
 @mcp.tool()
-async def spotify_share_song() -> str:
+async def spotify_share_song():
     """Share the current track via link"""
     try:
         await focus_window("Spotify")
@@ -12599,7 +12601,7 @@ async def spotify_share_song() -> str:
         return f"❌ Error sharing song: {str(e)}"
 
 @mcp.tool()
-async def spotify_follow_artist(artist_name: str) -> str:
+async def spotify_follow_artist(artist_name: str):
     """Follow a specific artist"""
     try:
         await focus_window("Spotify")
@@ -12612,7 +12614,7 @@ async def spotify_follow_artist(artist_name: str) -> str:
         return f"❌ Error following artist: {str(e)}"
 
 @mcp.tool()
-async def spotify_open_lyrics() -> str:
+async def spotify_open_lyrics():
     """Open lyrics for the current track"""
     try:
         await focus_window("Spotify")
@@ -12622,7 +12624,7 @@ async def spotify_open_lyrics() -> str:
         return f"❌ Error opening lyrics: {str(e)}"
 
 @mcp.tool()
-async def spotify_shuffle_toggle() -> str:
+async def spotify_shuffle_toggle():
     """Toggle shuffle mode"""
     try:
         await focus_window("Spotify")
@@ -12632,7 +12634,7 @@ async def spotify_shuffle_toggle() -> str:
         return f"❌ Error toggling shuffle: {str(e)}"
 
 @mcp.tool()
-async def spotify_repeat_toggle() -> str:
+async def spotify_repeat_toggle():
     """Toggle repeat mode"""
     try:
         await focus_window("Spotify")
@@ -12646,7 +12648,7 @@ async def spotify_repeat_toggle() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def automate_notepad(action: str, content: str = "") -> str:
+async def automate_notepad(action: str, content: str = ""):
     """Automate Notepad actions (open, type, save, etc.)"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -12679,7 +12681,7 @@ async def automate_notepad(action: str, content: str = "") -> str:
         return f"Error automating Notepad: {str(e)}"
 
 @mcp.tool()
-async def automate_calculator(expression: str) -> str:
+async def automate_calculator(expression: str):
     """Automate Calculator to perform calculations"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -12699,7 +12701,7 @@ async def automate_calculator(expression: str) -> str:
         return f"Error automating Calculator: {str(e)}"
 
 @mcp.tool()
-async def create_automation_workflow(steps: str) -> str:
+async def create_automation_workflow(steps: str):
     """Create and execute a custom automation workflow"""
     if not UI_AUTOMATION_AVAILABLE:
         return "UI automation libraries not available"
@@ -12744,7 +12746,7 @@ async def create_automation_workflow(steps: str) -> str:
         return f"Error executing workflow: {str(e)}"
 
 @mcp.tool()
-async def monitor_system_activity(duration: int = 60) -> str:
+async def monitor_system_activity(duration: int = 60):
     """Monitor system activity for specified duration"""
     try:
         start_time = time.time()
@@ -12773,7 +12775,7 @@ async def monitor_system_activity(duration: int = 60) -> str:
         return f"Error monitoring system activity: {str(e)}"
 
 @mcp.tool()
-async def monitor_for_security_issues() -> str:
+async def monitor_for_security_issues():
     """
     Monitor system for potential security issues and threats.
     
@@ -12943,7 +12945,7 @@ async def monitor_for_security_issues() -> str:
         return f"❌ Error monitoring for security issues: {str(e)}"
 
 @mcp.tool()
-async def get_ui_automation_status() -> str:
+async def get_ui_automation_status():
     """Get status of UI automation capabilities"""
     try:
         status = []
@@ -12972,7 +12974,7 @@ async def get_ui_automation_status() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def create_zip_archive(source_path: str, archive_name: str, include_hidden: bool = False) -> str:
+async def create_zip_archive(source_path: str, archive_name: str, include_hidden: bool = False):
     """Create a ZIP archive from files or directories"""
     try:
         import zipfile
@@ -12999,7 +13001,7 @@ async def create_zip_archive(source_path: str, archive_name: str, include_hidden
         return f"Error creating ZIP archive: {str(e)}"
 
 @mcp.tool()
-async def extract_zip_archive(archive_path: str, extract_to: str = ".") -> str:
+async def extract_zip_archive(archive_path: str, extract_to: str = "."):
     """Extract a ZIP archive to specified directory"""
     try:
         import zipfile
@@ -13023,7 +13025,7 @@ async def extract_zip_archive(archive_path: str, extract_to: str = ".") -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def search_text_in_files(search_term: str, directory: str = ".", file_pattern: str = "*.txt", case_sensitive: bool = False) -> str:
+async def search_text_in_files(search_term: str, directory: str = ".", file_pattern: str = "*.txt", case_sensitive: bool = False):
     """Search for text in files within a directory"""
     try:
         search_dir = Path(directory)
@@ -13052,7 +13054,7 @@ async def search_text_in_files(search_term: str, directory: str = ".", file_patt
         return f"Error searching text: {str(e)}"
 
 @mcp.tool()
-async def count_lines_in_file(file_path: str) -> str:
+async def count_lines_in_file(file_path: str):
     """Count lines, words, and characters in a text file"""
     try:
         file = Path(file_path)
@@ -13079,7 +13081,7 @@ async def count_lines_in_file(file_path: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def monitor_system_performance(duration: int = 60) -> str:
+async def monitor_system_performance(duration: int = 60):
     """Monitor system performance for specified duration"""
     try:
         samples = []
@@ -13115,7 +13117,7 @@ async def monitor_system_performance(duration: int = 60) -> str:
         return f"Error monitoring system performance: {str(e)}"
 
 @mcp.tool()
-async def get_network_interfaces() -> str:
+async def get_network_interfaces():
     """Get detailed network interface information"""
     try:
         interfaces = psutil.net_if_addrs()
@@ -13155,7 +13157,7 @@ async def get_network_interfaces() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def find_duplicate_files(directory: str = ".", min_size: int = 1024) -> str:
+async def find_duplicate_files(directory: str = ".", min_size: int = 1024):
     """Find duplicate files in a directory based on content hash"""
     try:
         import hashlib
@@ -13198,7 +13200,7 @@ async def find_duplicate_files(directory: str = ".", min_size: int = 1024) -> st
         return f"Error finding duplicates: {str(e)}"
 
 @mcp.tool()
-async def generate_file_checksum(file_path: str, algorithm: str = "md5") -> str:
+async def generate_file_checksum(file_path: str, algorithm: str = "md5"):
     """Generate checksum for a file using specified algorithm"""
     try:
         import hashlib
@@ -13236,7 +13238,7 @@ async def generate_file_checksum(file_path: str, algorithm: str = "md5") -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def create_sqlite_database(db_path: str, table_name: str, columns: str) -> str:
+async def create_sqlite_database(db_path: str, table_name: str, columns: str):
     """Create a simple SQLite database with a table"""
     try:
         import sqlite3
@@ -13255,7 +13257,7 @@ async def create_sqlite_database(db_path: str, table_name: str, columns: str) ->
         return f"Error creating database: {str(e)}"
 
 @mcp.tool()
-async def query_sqlite_database(db_path: str, query: str) -> str:
+async def query_sqlite_database(db_path: str, query: str):
     """Execute a SELECT query on SQLite database"""
     try:
         import sqlite3
@@ -13294,7 +13296,7 @@ async def query_sqlite_database(db_path: str, query: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def format_json_file(file_path: str, indent: int = 2) -> str:
+async def format_json_file(file_path: str, indent: int = 2):
     """Format and prettify a JSON file"""
     try:
         file = Path(file_path)
@@ -13319,7 +13321,7 @@ async def format_json_file(file_path: str, indent: int = 2) -> str:
         return f"Error formatting JSON: {str(e)}"
 
 @mcp.tool()
-async def validate_json_file(file_path: str) -> str:
+async def validate_json_file(file_path: str):
     """Validate JSON file syntax"""
     try:
         file = Path(file_path)
@@ -13353,7 +13355,7 @@ async def validate_json_file(file_path: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def generate_password(length: int = 12, include_symbols: bool = True) -> str:
+async def generate_password(length: int = 12, include_symbols: bool = True):
     """Generate a secure random password"""
     try:
         import secrets
@@ -13399,7 +13401,7 @@ async def generate_password(length: int = 12, include_symbols: bool = True) -> s
         return f"Error generating password: {str(e)}"
 
 @mcp.tool()
-async def encode_decode_base64(text: str, operation: str = "encode") -> str:
+async def encode_decode_base64(text: str, operation: str = "encode"):
     """Encode or decode text using Base64"""
     try:
         import base64
@@ -13422,7 +13424,7 @@ async def encode_decode_base64(text: str, operation: str = "encode") -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def bulk_rename_files(directory: str, pattern: str, replacement: str, file_extension: str = "*") -> str:
+async def bulk_rename_files(directory: str, pattern: str, replacement: str, file_extension: str = "*"):
     """Bulk rename files in a directory using pattern matching"""
     try:
         import re
@@ -13452,7 +13454,7 @@ async def bulk_rename_files(directory: str, pattern: str, replacement: str, file
         return f"Error bulk renaming files: {str(e)}"
 
 @mcp.tool()
-async def organize_files_by_type(source_dir: str, create_folders: bool = True) -> str:
+async def organize_files_by_type(source_dir: str, create_folders: bool = True):
     """Organize files into folders by file type"""
     try:
         source_path = Path(source_dir)
@@ -13511,7 +13513,7 @@ async def organize_files_by_type(source_dir: str, create_folders: bool = True) -
         return f"Error organizing files: {str(e)}"
 
 @mcp.tool()
-async def clean_empty_directories(directory: str, dry_run: bool = True) -> str:
+async def clean_empty_directories(directory: str, dry_run: bool = True):
     """Remove empty directories recursively"""
     try:
         search_dir = Path(directory)
@@ -13549,7 +13551,7 @@ async def clean_empty_directories(directory: str, dry_run: bool = True) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def clean_temp_files() -> str:
+async def clean_temp_files():
     """Clean temporary files from system temp directories"""
     try:
         import tempfile
@@ -13593,7 +13595,7 @@ async def clean_temp_files() -> str:
         return f"Error cleaning temp files: {str(e)}"
 
 @mcp.tool()
-async def analyze_disk_usage(directory: str = "C:\\", top_n: int = 20) -> str:
+async def analyze_disk_usage(directory: str = "C:\\", top_n: int = 20):
     """Analyze disk usage and show largest files/directories"""
     try:
         target_dir = Path(directory)
@@ -13639,7 +13641,7 @@ async def analyze_disk_usage(directory: str = "C:\\", top_n: int = 20) -> str:
         return f"Error analyzing disk usage: {str(e)}"
 
 @mcp.tool()
-async def system_health_check() -> str:
+async def system_health_check():
     """Perform comprehensive system health check"""
     try:
         health_report = []
@@ -13719,7 +13721,7 @@ async def system_health_check() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def network_speed_test() -> str:
+async def network_speed_test():
     """Test network speed using ping and download test"""
     try:
 
@@ -13793,7 +13795,7 @@ async def network_speed_test() -> str:
         return f"Error testing network speed: {str(e)}"
 
 @mcp.tool()
-async def scan_open_ports(target_host: str = "localhost", start_port: int = 1, end_port: int = 1000) -> str:
+async def scan_open_ports(target_host: str = "localhost", start_port: int = 1, end_port: int = 1000):
     """Scan for open ports on a target host"""
     try:
         def scan_port(host, port):
@@ -13844,7 +13846,7 @@ async def scan_open_ports(target_host: str = "localhost", start_port: int = 1, e
 # ==============================================================================
 
 @mcp.tool()
-async def fetch_web_content(url: str, extract_text: bool = True) -> str:
+async def fetch_web_content(url: str, extract_text: bool = True):
     """Fetch and extract content from a web page"""
     try:
 
@@ -13906,7 +13908,7 @@ async def fetch_web_content(url: str, extract_text: bool = True) -> str:
         return f"Error fetching web content: {str(e)}"
 
 @mcp.tool()
-async def check_website_status(urls: str) -> str:
+async def check_website_status(urls: str):
     """Check the status of multiple websites (comma-separated URLs)"""
     try:
 
@@ -13950,7 +13952,7 @@ async def check_website_status(urls: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def advanced_process_manager(action: str, process_identifier: str = "", signal_type: str = "TERM") -> str:
+async def advanced_process_manager(action: str, process_identifier: str = "", signal_type: str = "TERM"):
     """Advanced process management with filtering and bulk operations"""
     try:
         if action == "list_detailed":
@@ -14038,7 +14040,7 @@ async def advanced_process_manager(action: str, process_identifier: str = "", si
         return f"Error in process management: {str(e)}"
 
 @mcp.tool()
-async def service_manager(action: str, service_name: str = "") -> str:
+async def service_manager(action: str, service_name: str = ""):
     """
     Manage Windows services with secure input validation.
     
@@ -14132,7 +14134,7 @@ async def service_manager(action: str, service_name: str = "") -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def create_backup(source_path: str, backup_path: str, compress: bool = True, exclude_patterns: str = "") -> str:
+async def create_backup(source_path: str, backup_path: str, compress: bool = True, exclude_patterns: str = ""):
     """Create a backup of files/directories with optional compression"""
     try:
         import zipfile
@@ -14206,7 +14208,7 @@ async def create_backup(source_path: str, backup_path: str, compress: bool = Tru
         return f"Error creating backup: {str(e)}"
 
 @mcp.tool()
-async def sync_directories(source_dir: str, target_dir: str, sync_mode: str = "mirror", dry_run: bool = True) -> str:
+async def sync_directories(source_dir: str, target_dir: str, sync_mode: str = "mirror", dry_run: bool = True):
     """Synchronize two directories with different modes"""
     try:
         source = Path(source_dir)
@@ -14281,7 +14283,7 @@ async def sync_directories(source_dir: str, target_dir: str, sync_mode: str = "m
 # ==============================================================================
 
 @mcp.tool()
-async def registry_read_key(hive: str, key_path: str, value_name: str = "") -> str:
+async def registry_read_key(hive: str, key_path: str, value_name: str = ""):
     """Read Windows registry key or value"""
     try:
         # Map hive names to constants
@@ -14360,7 +14362,7 @@ async def registry_read_key(hive: str, key_path: str, value_name: str = "") -> s
         return f"Error reading registry: {str(e)}"
 
 @mcp.tool()
-async def registry_backup_key(hive: str, key_path: str, backup_file: str) -> str:
+async def registry_backup_key(hive: str, key_path: str, backup_file: str):
     """Backup a registry key to a .reg file"""
     try:
         result = subprocess.run(
@@ -14382,7 +14384,7 @@ async def registry_backup_key(hive: str, key_path: str, backup_file: str) -> str
 # ==============================================================================
 
 @mcp.tool()
-async def service_list_all(status_filter: str = "all") -> str:
+async def service_list_all(status_filter: str = "all"):
     """List Windows services with optional status filter"""
     try:
         if status_filter.lower() == "running":
@@ -14408,7 +14410,7 @@ async def service_list_all(status_filter: str = "all") -> str:
         return f"Error listing services: {str(e)}"
 
 @mcp.tool()
-async def service_control(service_name: str, action: str) -> str:
+async def service_control(service_name: str, action: str):
     """Control Windows service (start, stop, restart, enable, disable)"""
     try:
         actions_map = {
@@ -14444,7 +14446,7 @@ async def service_control(service_name: str, action: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def windows_features_list() -> str:
+async def windows_features_list():
     """List all Windows optional features"""
     try:
         command = 'Get-WindowsOptionalFeature -Online | Format-Table FeatureName,State -AutoSize'
@@ -14464,7 +14466,7 @@ async def windows_features_list() -> str:
         return f"Error listing Windows features: {str(e)}"
 
 @mcp.tool()
-async def windows_feature_control(feature_name: str, action: str) -> str:
+async def windows_feature_control(feature_name: str, action: str):
     """Enable or disable Windows optional features"""
     try:
         if action.lower() == "enable":
@@ -14494,7 +14496,7 @@ async def windows_feature_control(feature_name: str, action: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def event_log_query(log_name: str = "System", level: str = "Error", hours: int = 24) -> str:
+async def event_log_query(log_name: str = "System", level: str = "Error", hours: int = 24):
     """Query Windows Event Logs"""
     try:
         # Map level names to numbers
@@ -14531,7 +14533,7 @@ async def event_log_query(log_name: str = "System", level: str = "Error", hours:
         return f"Error querying event log: {str(e)}"
 
 @mcp.tool()
-async def event_log_clear(log_name: str) -> str:
+async def event_log_clear(log_name: str):
     """Clear a Windows Event Log (requires admin privileges)"""
     try:
         command = f'Clear-EventLog -LogName "{log_name}"'
@@ -14554,7 +14556,7 @@ async def event_log_clear(log_name: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def task_scheduler_list() -> str:
+async def task_scheduler_list():
     """List scheduled tasks"""
     try:
         command = 'Get-ScheduledTask | Where-Object {$_.State -ne "Disabled"} | Format-Table TaskName,State,LastRunTime -AutoSize'
@@ -14574,7 +14576,7 @@ async def task_scheduler_list() -> str:
         return f"Error listing scheduled tasks: {str(e)}"
 
 @mcp.tool()
-async def task_scheduler_control(task_name: str, action: str) -> str:
+async def task_scheduler_control(task_name: str, action: str):
     """Control scheduled tasks (start, stop, enable, disable)"""
     try:
         actions_map = {
@@ -14609,8 +14611,8 @@ async def task_scheduler_control(task_name: str, action: str) -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def firewall_status() -> str:
-    """Get Windows Firewall status"""
+async def firewall_status_summary():
+    """Get Windows Firewall status summary"""
     try:
         command = 'Get-NetFirewallProfile | Format-Table Name,Enabled,DefaultInboundAction,DefaultOutboundAction -AutoSize'
         result = subprocess.run(
@@ -14630,8 +14632,8 @@ async def firewall_status() -> str:
 
 @mcp.tool()
 @windows_only
-async def firewall_rules_list(direction: str = "inbound") -> str:
-    """List firewall rules"""
+async def firewall_rules_summary(direction: str = "inbound"):
+    """List firewall rules summary"""
     try:
         if direction.lower() not in ['inbound', 'outbound']:
             return "Direction must be 'inbound' or 'outbound'"
@@ -14657,7 +14659,7 @@ async def firewall_rules_list(direction: str = "inbound") -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def user_accounts_list() -> str:
+async def user_accounts_list():
     """List local user accounts"""
     try:
         command = 'Get-LocalUser | Format-Table Name,Enabled,LastLogon,PasswordExpires -AutoSize'
@@ -14677,7 +14679,7 @@ async def user_accounts_list() -> str:
         return f"Error listing user accounts: {str(e)}"
 
 @mcp.tool()
-async def user_groups_list() -> str:
+async def user_groups_list():
     """List local user groups"""
     try:
         command = 'Get-LocalGroup | Format-Table Name,Description -AutoSize'
@@ -14701,7 +14703,7 @@ async def user_groups_list() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def certificates_list(store: str = "CurrentUser") -> str:
+async def certificates_list(store: str = "CurrentUser"):
     """List certificates in Windows certificate store"""
     try:
         if store not in ['CurrentUser', 'LocalMachine']:
@@ -14728,7 +14730,7 @@ async def certificates_list(store: str = "CurrentUser") -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def performance_counters(counter_path: str = r"\Processor(_Total)\% Processor Time", samples: int = 5) -> str:
+async def performance_counters(counter_path: str = r"\Processor(_Total)\% Processor Time", samples: int = 5):
     """Monitor Windows performance counters"""
     try:
         command = f'Get-Counter -Counter "{counter_path}" -SampleInterval 1 -MaxSamples {samples} | Format-Table Timestamp,CounterSamples -AutoSize'
@@ -14748,7 +14750,7 @@ async def performance_counters(counter_path: str = r"\Processor(_Total)\% Proces
         return f"Error monitoring performance counter: {str(e)}"
 
 @mcp.tool()
-async def system_uptime() -> str:
+async def system_uptime():
     """Get system uptime information"""
     try:
         command = '(Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime | Format-Table Days,Hours,Minutes,Seconds -AutoSize'
@@ -14772,7 +14774,7 @@ async def system_uptime() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def drivers_list() -> str:
+async def drivers_list():
     """List installed device drivers"""
     try:
         command = 'Get-WindowsDriver -Online | Format-Table Driver,ClassName,ProviderName,Date,Version -AutoSize'
@@ -14792,7 +14794,7 @@ async def drivers_list() -> str:
         return f"Error listing drivers: {str(e)}"
 
 @mcp.tool()
-async def device_manager_info() -> str:
+async def device_manager_info():
     """Get device manager information"""
     try:
         command = 'Get-PnpDevice | Where-Object {$_.Status -ne "OK"} | Format-Table InstanceId,FriendlyName,Status,Class -AutoSize'
@@ -14819,8 +14821,8 @@ async def device_manager_info() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def network_adapters_info() -> str:
-    """Get detailed network adapter information"""
+async def network_adapters_summary():
+    """Get network adapter summary information"""
     try:
         command = 'Get-NetAdapter | Format-Table Name,InterfaceDescription,Status,LinkSpeed,MacAddress -AutoSize'
         result = subprocess.run(
@@ -14839,8 +14841,8 @@ async def network_adapters_info() -> str:
         return f"Error getting network adapters: {str(e)}"
 
 @mcp.tool()
-async def wifi_profiles_list() -> str:
-    """List saved WiFi profiles"""
+async def wifi_profiles_summary():
+    """List saved WiFi profiles (summary)"""
     try:
         result = subprocess.run(["netsh", "wlan", "show", "profiles"], capture_output=True, text=True, timeout=10)
 
@@ -14853,8 +14855,8 @@ async def wifi_profiles_list() -> str:
         return f"Error listing WiFi profiles: {str(e)}"
 
 @mcp.tool()
-async def dns_cache_info() -> str:
-    """Get DNS cache information"""
+async def dns_cache_summary():
+    """Get DNS cache summary information"""
     try:
         command = 'Get-DnsClientCache | Format-Table Name,Type,Status,DataLength -AutoSize'
         result = subprocess.run(
@@ -14873,8 +14875,8 @@ async def dns_cache_info() -> str:
         return f"Error getting DNS cache: {str(e)}"
 
 @mcp.tool()
-async def flush_dns_cache() -> str:
-    """Flush Windows DNS cache"""
+async def flush_dns_cache_quick():
+    """Flush Windows DNS cache (quick)"""
     try:
         result = subprocess.run(["ipconfig", "/flushdns"], capture_output=True, text=True, timeout=10)
 
@@ -14891,7 +14893,7 @@ async def flush_dns_cache() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def system_file_checker() -> str:
+async def system_file_checker():
     """Run System File Checker (SFC scan)"""
     try:
         result = subprocess.run(
@@ -14909,7 +14911,7 @@ async def system_file_checker() -> str:
         return f"Error running System File Checker: {str(e)}"
 
 @mcp.tool()
-async def disk_cleanup_analyze(drive: str = "C:") -> str:
+async def disk_cleanup_analyze(drive: str = "C:"):
     """Analyze disk for cleanup opportunities"""
     try:
         subprocess.run(["cleanmgr", "/sageset:1", "/d", drive], timeout=30)
@@ -14934,7 +14936,7 @@ async def disk_cleanup_analyze(drive: str = "C:") -> str:
         return f"Error analyzing disk cleanup: {str(e)}"
 
 @mcp.tool()
-async def windows_update_status() -> str:
+async def windows_update_status():
     """Get Windows Update status"""
     try:
         command = 'Get-WindowsUpdate -MicrosoftUpdate | Format-Table Title,Size,Status -AutoSize'
@@ -14974,7 +14976,7 @@ ml_scheduler_thread = None
 last_training_date = None
 
 @mcp.tool()
-async def setup_auto_daily_retraining() -> str:
+async def setup_auto_daily_retraining():
     """Set up automated daily ML model retraining with intelligent scheduling"""
     global ml_scheduler_active, ml_scheduler_thread
 
@@ -15192,7 +15194,7 @@ Scheduler is now running in background! 🚀"""
         return f"❌ Error setting up auto-retraining: {str(e)}"
 
 @mcp.tool()
-async def stop_auto_retraining() -> str:
+async def stop_auto_retraining():
     """Stop the automated daily ML model retraining scheduler"""
     global ml_scheduler_active, ml_scheduler_thread
 
@@ -15208,7 +15210,7 @@ async def stop_auto_retraining() -> str:
     return "🛑 ML Auto-retraining scheduler stopped successfully."
 
 @mcp.tool()
-async def get_auto_training_status() -> str:
+async def get_auto_training_status():
     """Get current status of automated ML training scheduler"""
     global ml_scheduler_active
 
@@ -15263,7 +15265,7 @@ async def get_auto_training_status() -> str:
         return f"❌ Error getting auto-training status: {str(e)}"
 
 @mcp.tool()
-async def trigger_manual_retraining() -> str:
+async def trigger_manual_retraining():
     """Manually trigger ML model retraining (bypasses schedule)"""
     try:
         from datetime import datetime
@@ -15298,7 +15300,7 @@ async def trigger_manual_retraining() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def get_ml_monitor_status() -> str:
+async def get_ml_monitor_status():
     """Get comprehensive ML monitoring system status including data collection progress and training readiness"""
     try:
         import json
@@ -15431,7 +15433,7 @@ async def get_ml_monitor_status() -> str:
         return f"Error generating ML monitor status: {str(e)}"
 
 @mcp.tool()
-async def get_ml_monitor_detailed_status() -> str:
+async def get_ml_monitor_detailed_status():
     """Get detailed ML monitoring status with process information and file system analysis"""
     try:
         import json
@@ -15580,8 +15582,8 @@ async def get_ml_monitor_detailed_status() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def get_network_interfaces() -> str:
-    """Get detailed network interface information"""
+async def get_network_interfaces_detailed():
+    """Get detailed network interface information with IP configuration"""
     try:
         command = '''
         Write-Host "=== NETWORK INTERFACES ==="
@@ -15629,8 +15631,8 @@ async def get_network_interfaces() -> str:
         return f"Error getting network interfaces: {str(e)}"
 
 @mcp.tool()
-async def network_adapters_info() -> str:
-    """Get detailed network adapter information"""
+async def network_adapters_detailed():
+    """Get detailed network adapter information with WMI data"""
     try:
         command = '''
         Write-Host "=== DETAILED NETWORK ADAPTER INFO ==="
@@ -15686,8 +15688,8 @@ async def network_adapters_info() -> str:
         return f"Error getting network adapter info: {str(e)}"
 
 @mcp.tool()
-async def wifi_profiles_list() -> str:
-    """List saved WiFi profiles"""
+async def wifi_profiles_detailed():
+    """List saved WiFi profiles with detailed security info"""
     try:
         # Get WiFi profiles
         result = subprocess.run(
@@ -15751,8 +15753,8 @@ async def wifi_profiles_list() -> str:
         return f"Error listing WiFi profiles: {str(e)}"
 
 @mcp.tool()
-async def dns_cache_info() -> str:
-    """Get DNS cache information"""
+async def dns_cache_detailed():
+    """Get detailed DNS cache information with parsed entries"""
     try:
         result = subprocess.run(
             "ipconfig /displaydns",
@@ -15808,8 +15810,8 @@ async def dns_cache_info() -> str:
         return f"Error getting DNS cache info: {str(e)}"
 
 @mcp.tool()
-async def flush_dns_cache() -> str:
-    """Flush Windows DNS cache"""
+async def flush_dns_cache_and_verify():
+    """Flush Windows DNS cache and verify the operation"""
     try:
         result = subprocess.run(
             "ipconfig /flushdns",
@@ -15828,8 +15830,8 @@ async def flush_dns_cache() -> str:
         return f"Error flushing DNS cache: {str(e)}"
 
 @mcp.tool()
-async def firewall_status() -> str:
-    """Get Windows Firewall status"""
+async def firewall_status_detailed():
+    """Get detailed Windows Firewall status with all profile settings"""
     try:
         command = '''
         Write-Host "=== WINDOWS FIREWALL STATUS ==="
@@ -15872,8 +15874,8 @@ async def firewall_status() -> str:
         return f"Error getting firewall status: {str(e)}"
 
 @mcp.tool()
-async def firewall_rules_list(direction: str = "inbound") -> str:
-    """List firewall rules"""
+async def firewall_rules_detailed(direction: str = "inbound"):
+    """List firewall rules with detailed port and address info"""
     try:
         # Validate direction
         if direction.lower() not in ["inbound", "outbound"]:
@@ -15933,7 +15935,7 @@ async def firewall_rules_list(direction: str = "inbound") -> str:
         return f"Error getting firewall rules: {str(e)}"
 
 @mcp.tool()
-async def advanced_network_diagnostics() -> str:
+async def advanced_network_diagnostics():
     """Advanced network diagnostics and troubleshooting"""
     try:
         command = '''
@@ -16015,7 +16017,7 @@ async def advanced_network_diagnostics() -> str:
         return f"Error running network diagnostics: {str(e)}"
 
 @mcp.tool()
-async def network_performance_monitor(duration: int = 60) -> str:
+async def network_performance_monitor(duration: int = 60):
     """Monitor network performance for specified duration"""
     try:
         if duration > 300:  # Limit to 5 minutes
@@ -16068,7 +16070,7 @@ async def network_performance_monitor(duration: int = 60) -> str:
         return f"Error monitoring network performance: {str(e)}"
 
 @mcp.tool()
-async def network_security_scan() -> str:
+async def network_security_scan():
     """Perform network security scanning and analysis"""
     try:
         command = '''
@@ -16162,7 +16164,7 @@ async def network_security_scan() -> str:
 # ==============================================================================
 
 @mcp.tool()
-async def monitor_status() -> str:
+async def monitor_status():
     """Get comprehensive monitor and display status information"""
     try:
         results = []
@@ -16255,7 +16257,7 @@ async def monitor_status() -> str:
         return f"Error getting monitor status: {str(e)}"
 
 @mcp.tool()
-async def monitor_list_resolutions() -> str:
+async def monitor_list_resolutions():
     """List available display resolutions for all monitors"""
     try:
         command = '''
@@ -16336,7 +16338,7 @@ async def monitor_list_resolutions() -> str:
         return f"Error listing display resolutions: {str(e)}"
 
 @mcp.tool()
-async def monitor_brightness_info() -> str:
+async def monitor_brightness_info():
     """Get monitor brightness information and capabilities"""
     try:
         command = '''
@@ -16393,7 +16395,7 @@ async def monitor_brightness_info() -> str:
         return f"Error getting brightness information: {str(e)}"
 
 @mcp.tool()
-async def monitor_set_brightness(brightness_level: int) -> str:
+async def monitor_set_brightness(brightness_level: int):
     """Set monitor brightness (0-100, works on laptops and some external monitors)"""
     try:
         if not 0 <= brightness_level <= 100:
@@ -16437,7 +16439,7 @@ async def monitor_set_brightness(brightness_level: int) -> str:
         return f"Error setting brightness: {str(e)}"
 
 @mcp.tool()
-async def monitor_display_mode(mode: str) -> str:
+async def monitor_display_mode(mode: str):
     """Change display mode (duplicate, extend, internal, external)"""
     try:
         mode_map = {
@@ -16463,7 +16465,7 @@ async def monitor_display_mode(mode: str) -> str:
         return f"Error changing display mode: {str(e)}"
 
 @mcp.tool()
-async def monitor_resolution_change(width: int, height: int, refresh_rate: int = 60) -> str:
+async def monitor_resolution_change(width: int, height: int, refresh_rate: int = 60):
     """Change display resolution and refresh rate"""
     try:
         command = f'''
@@ -16537,7 +16539,7 @@ async def monitor_resolution_change(width: int, height: int, refresh_rate: int =
         return f"Error changing resolution: {str(e)}"
 
 @mcp.tool()
-async def monitor_power_settings() -> str:
+async def monitor_power_settings():
     """Get and display monitor power management settings"""
     try:
         command = '''
@@ -16588,7 +16590,7 @@ async def monitor_power_settings() -> str:
         return f"Error getting power settings: {str(e)}"
 
 @mcp.tool()
-async def monitor_color_profile() -> str:
+async def monitor_color_profile():
     """Get monitor color profile information"""
     try:
         command = '''
