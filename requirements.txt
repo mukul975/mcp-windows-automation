@@ -1,55 +1,54 @@
 # MCP Windows Automation Server Requirements
 
 # Core MCP dependencies
-mcp>=1.0.0
+mcp==1.25.0
 
 # Windows automation (Windows-only packages)
-pyautogui>=0.9.54; platform_system=="Windows"
-pywin32>=306; platform_system=="Windows"
-psutil>=5.9.0
-pillow>=10.0.0
+pyautogui==0.9.54; platform_system=="Windows"
+pywin32==308; platform_system=="Windows"
+psutil==6.1.1
+pillow==11.1.0
 
 # Web automation
-selenium>=4.15.0
-webdriver-manager>=4.0.0
+selenium==4.27.1
+webdriver-manager==4.0.2
 
 # Image processing and computer vision
-opencv-python>=4.8.0
-numpy>=1.24.0
+opencv-python==4.11.0.86
+numpy==2.2.3
 
 # GUI frameworks (Windows/Desktop only)
-tkinter-tooltip>=2.0.0; platform_system=="Windows"
-customtkinter>=5.2.0; platform_system=="Windows"
+tkinter-tooltip==3.1.2; platform_system=="Windows"
+customtkinter==5.2.2; platform_system=="Windows"
 
 # HTTP and networking
-requests>=2.31.0
-aiohttp>=3.8.0
+requests==2.32.3
+aiohttp==3.11.14
 
 # JSON and data handling
-jsonschema>=4.17.0
+jsonschema==4.23.0
 
 # Logging and utilities
-colorlog>=6.7.0
-click>=8.1.0
+colorlog==6.9.0
+click==8.1.8
 
 # Machine Learning
-scikit-learn>=1.3.0
-pandas>=2.0.0
-numpy>=1.24.0
-joblib>=1.3.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
+scikit-learn==1.6.1
+pandas==2.2.3
+joblib==1.4.2
+matplotlib==3.10.1
+seaborn==0.13.2
 
 # Testing
-pytest>=7.4.0
-pytest-asyncio>=0.21.0
+pytest==8.3.5
+pytest-asyncio==0.25.3
 
 # Development
-black>=23.0.0
-flake8>=6.0.0
-mypy>=1.5.0
+black==25.1.0
+flake8==7.1.2
+mypy==1.15.0
 
 # Office Integration
-python-docx>=0.8.11
-openpyxl>=3.1.0
-python-pptx>=0.6.21
+python-docx==1.1.2
+openpyxl==3.1.5
+python-pptx==1.0.2
