@@ -22,7 +22,7 @@ tkinter-tooltip==3.1.2; platform_system=="Windows"
 customtkinter==5.2.2; platform_system=="Windows"
 
 # HTTP and networking
-requests==2.32.3
+requests==2.33.0
 aiohttp==3.11.14
 
 # JSON and data handling
