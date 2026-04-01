@@ -23,7 +23,7 @@ customtkinter==5.2.2; platform_system=="Windows"
 
 # HTTP and networking
 requests==2.32.3
-aiohttp==3.11.14
+aiohttp==3.13.4
 
 # JSON and data handling
 jsonschema==4.23.0
