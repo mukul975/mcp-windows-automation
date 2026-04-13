@@ -7,7 +7,7 @@ mcp==1.25.0
 pyautogui==0.9.54; platform_system=="Windows"
 pywin32==308; platform_system=="Windows"
 psutil==6.1.1
-pillow==11.1.0
+pillow==12.2.0
 
 # Web automation
 selenium==4.27.1
